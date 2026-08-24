@@ -658,33 +658,41 @@
                             <select id="cidade" required>
                                 <option value="">Selecione a cidade...</option>
                                 <optgroup label="🇧🇷 Brasil">
-                                    <option value="-23.55|São Paulo, SP">São Paulo, SP</option>
-                                    <option value="-22.91|Rio de Janeiro, RJ">Rio de Janeiro, RJ</option>
-                                    <option value="-19.92|Belo Horizonte, MG">Belo Horizonte, MG</option>
-                                    <option value="-15.78|Brasília, DF">Brasília, DF</option>
-                                    <option value="-12.97|Salvador, BA">Salvador, BA</option>
-                                    <option value="-3.72|Fortaleza, CE">Fortaleza, CE</option>
-                                    <option value="-8.05|Recife, PE">Recife, PE</option>
-                                    <option value="-30.03|Porto Alegre, RS">Porto Alegre, RS</option>
-                                    <option value="-25.43|Curitiba, PR">Curitiba, PR</option>
-                                    <option value="-2.50|Manaus, AM">Manaus, AM</option>
-                                    <option value="-1.46|Belém, PA">Belém, PA</option>
-                                    <option value="-20.32|Vitória, ES">Vitória, ES</option>
-                                    <option value="-16.68|Goiânia, GO">Goiânia, GO</option>
-                                    <option value="-27.59|Florianópolis, SC">Florianópolis, SC</option>
-                                    <option value="-5.79|Natal, RN">Natal, RN</option>
+                                    <option value="-23.55|-46.63|-3|São Paulo, SP">São Paulo, SP</option>
+                                    <option value="-22.91|-43.17|-3|Rio de Janeiro, RJ">Rio de Janeiro, RJ</option>
+                                    <option value="-19.92|-43.94|-3|Belo Horizonte, MG">Belo Horizonte, MG</option>
+                                    <option value="-15.78|-47.93|-3|Brasília, DF">Brasília, DF</option>
+                                    <option value="-12.97|-38.51|-3|Salvador, BA">Salvador, BA</option>
+                                    <option value="-3.72|-38.54|-3|Fortaleza, CE">Fortaleza, CE</option>
+                                    <option value="-25.43|-49.27|-3|Curitiba, PR">Curitiba, PR</option>
+                                    <option value="-8.05|-34.87|-3|Recife, PE">Recife, PE</option>
+                                    <option value="-30.03|-51.23|-3|Porto Alegre, RS">Porto Alegre, RS</option>
+                                    <option value="-3.12|-60.02|-4|Manaus, AM">Manaus, AM</option>
+                                    <option value="-1.46|-48.5|-3|Belém, PA">Belém, PA</option>
+                                    <option value="-16.68|-49.25|-3|Goiânia, GO">Goiânia, GO</option>
+                                    <option value="-22.91|-47.06|-3|Campinas, SP">Campinas, SP</option>
+                                    <option value="-27.6|-48.55|-3|Florianópolis, SC">Florianópolis, SC</option>
+                                    <option value="-20.32|-40.34|-3|Vitória, ES">Vitória, ES</option>
+                                    <option value="-5.79|-35.21|-3|Natal, RN">Natal, RN</option>
+                                    <option value="-2.53|-44.28|-3|São Luís, MA">São Luís, MA</option>
+                                    <option value="-9.67|-35.74|-3|Maceió, AL">Maceió, AL</option>
+                                    <option value="-7.12|-34.86|-3|João Pessoa, PB">João Pessoa, PB</option>
+                                    <option value="-10.91|-37.07|-3|Aracaju, SE">Aracaju, SE</option>
+                                    <option value="-15.6|-56.1|-4|Cuiabá, MT">Cuiabá, MT</option>
+                                    <option value="-20.44|-54.65|-4|Campo Grande, MS">Campo Grande, MS</option>
                                 </optgroup>
                                 <optgroup label="🌎 Internacional">
-                                    <option value="40.71|Nova York, EUA">Nova York, EUA</option>
-                                    <option value="51.51|Londres, UK">Londres, UK</option>
-                                    <option value="48.86|Paris, França">Paris, França</option>
-                                    <option value="35.68|Tóquio, Japão">Tóquio, Japão</option>
-                                    <option value="-33.87|Sydney, Austrália">Sydney, Austrália</option>
-                                    <option value="19.43|Cidade do México, México">Cidade do México, México</option>
-                                    <option value="55.76|Moscou, Rússia">Moscou, Rússia</option>
-                                    <option value="-34.60|Buenos Aires, Argentina">Buenos Aires, Argentina</option>
-                                    <option value="28.61|Nova Delhi, Índia">Nova Delhi, Índia</option>
-                                    <option value="1.35|Singapura">Singapura</option>
+                                    <option value="-34.6|-58.38|-3|Buenos Aires, Argentina">Buenos Aires, Argentina</option>
+                                    <option value="38.72|-9.14|0|Lisboa, Portugal">Lisboa, Portugal</option>
+                                    <option value="41.15|-8.61|0|Porto, Portugal">Porto, Portugal</option>
+                                    <option value="51.51|-0.13|0|Londres, UK">Londres, UK</option>
+                                    <option value="48.86|2.35|1|Paris, França">Paris, França</option>
+                                    <option value="41.38|2.17|1|Barcelona, Espanha">Barcelona, Espanha</option>
+                                    <option value="41.9|12.5|1|Roma, Itália">Roma, Itália</option>
+                                    <option value="40.71|-74.01|-5|New York, EUA">New York, EUA</option>
+                                    <option value="34.05|-118.24|-8|Los Angeles, EUA">Los Angeles, EUA</option>
+                                    <option value="35.68|139.69|9|Tóquio, Japão">Tóquio, Japão</option>
+                                    <option value="-33.87|151.21|10|Sydney, Austrália">Sydney, Austrália</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -881,51 +889,55 @@
         return SIGNOS[0]; // fallback
     }
 
-    function calcularAscendente(data, hora, latitude) {
-        // Cálculo simplificado de ascendente baseado em tempo sideral
-        // Fórmula: Tempo Sideral Local → Signo Ascendente
+    function calcularAscendente(data, hora, latitude, longitude, fusoHorario) {
+        // Cálculo do ascendente baseado em astronomia posicional
+        // Converte hora local → UTC → Tempo Sideral Local → Ascendente
         
         const [ano, mes, dia] = data.split('-').map(Number);
         const [h, m] = hora.split(':').map(Number);
+        const horaLocal = h + m / 60;
         
-        // Dia Juliano simplificado (J2000.0 epoch)
+        // Converter hora local para UTC
+        const horaUTC = horaLocal - fusoHorario;
+        
+        // Dia Juliano (J2000.0 epoch) usando hora UTC
         const a = Math.floor((14 - mes) / 12);
         const y = ano + 4800 - a;
         const mj = mes + 12 * a - 3;
         const JD = dia + Math.floor((153 * mj + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
         
-        // Século Juliano desde J2000.0
-        const T = (JD - 2451545.0) / 36525.0;
+        // Dias desde J2000.0 (incluindo hora UTC)
+        const D = JD - 2451545.0 + (horaUTC - 12) / 24;
         
-        // Tempo Sideral em Greenwich (em graus) - fórmula simplificada
-        let GST = 280.46061837 + 360.98564736629 * (JD - 2451545.0) + 0.000387933 * T * T;
-        GST = GST % 360;
-        if (GST < 0) GST += 360;
+        // Século Juliano
+        const T = D / 36525.0;
         
-        // Adicionar hora local (convertida para graus)
-        const horaDecimal = h + m / 60;
-        const horaGraus = horaDecimal * 15; // 15 graus por hora
+        // Greenwich Mean Sidereal Time (graus)
+        let GMST = 280.46061837 + 360.98564736629 * D + 0.000387933 * T * T;
+        GMST = ((GMST % 360) + 360) % 360;
         
-        // Tempo Sideral Local (aproximado - sem longitude exata, usamos ajuste pela latitude)
-        let LST = GST + horaGraus;
+        // Local Sidereal Time = GMST + longitude
+        let LST = ((GMST + longitude) % 360 + 360) % 360;
         
-        // Ajuste pela latitude (fórmula simplificada do ascendente)
-        // RAMC (Right Ascension of Medium Coeli) = LST
-        // Ascendente = atan(-cos(RAMC) / (sin(ε) * tan(φ) + cos(ε) * sin(RAMC)))
-        // ε (obliquidade da eclíptica) ≈ 23.44°
+        // Obliquidade da eclíptica (graus)
+        const epsilon = 23.4393 - 0.0000004 * D;
         
+        // Converter para radianos
         const latRad = latitude * Math.PI / 180;
-        const epsilon = 23.44 * Math.PI / 180; // obliquidade
-        const ramcRad = (LST % 360) * Math.PI / 180;
+        const epsRad = epsilon * Math.PI / 180;
+        const lstRad = LST * Math.PI / 180;
         
+        // Fórmula do Ascendente
+        // ASC = atan2(cos(LST), -(sin(LST)*cos(ε) + tan(lat)*sin(ε)))
         let ascRad = Math.atan2(
-            -Math.cos(ramcRad),
-            Math.sin(epsilon) * Math.tan(latRad) + Math.cos(epsilon) * Math.sin(ramcRad)
+            Math.cos(lstRad),
+            -(Math.sin(lstRad) * Math.cos(epsRad) + Math.tan(latRad) * Math.sin(epsRad))
         );
         
-        let ascDeg = (ascRad * 180 / Math.PI + 360) % 360;
+        let ascDeg = ascRad * 180 / Math.PI;
+        if (ascDeg < 0) ascDeg += 360;
         
-        // Converter graus para índice de signo (cada signo = 30°)
+        // Converter graus para signo (cada signo = 30°)
         const signoIndex = Math.floor(ascDeg / 30) % 12;
         
         return SIGNOS[signoIndex];
@@ -994,32 +1006,39 @@
     let membrosTime = [];
     let usandoSheets = false;
 
-    function isGoogleSheetsConfigured() {
-        return SCRIPT_URL && SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbyNJB5kUJISA5cDR7nFQOeb9vo2T4C4POO-saMdsDT3_ecXc8wzEc0IGEenWNPYxJVwKg/exec' && SCRIPT_URL.includes('script.google.com');
+
+    // Helper: formatar data yyyy-mm-dd → dd/mm/aaaa
+    function formatarData(dataISO) {
+        if (!dataISO) return '';
+        const parts = dataISO.split('-');
+        if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+        return dataISO;
     }
 
-    async function salvarMembro(dados) {
-        // Sempre salvar no localStorage
+    function isGoogleSheetsConfigured() {
+        return SCRIPT_URL && SCRIPT_URL !== 'COLE_SUA_URL_AQUI' && SCRIPT_URL.includes('script.google.com');
+    }
+
+    function salvarMembro(dados) {
+        // Sempre salvar no localStorage primeiro
         salvarLocalStorage(dados);
         
         if (isGoogleSheetsConfigured()) {
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(dados)
-                });
-                const result = await response.json();
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(dados)
+            }).then(function(r) { return r.json(); })
+            .then(function(result) {
                 if (result.success) {
                     showToast('✅ Salvo na planilha com sucesso!', 'success');
                     usandoSheets = true;
                 } else {
-                    showToast('⚠️ Erro ao salvar na planilha. Salvo localmente.', 'error');
+                    showToast('⚠️ Erro ao salvar. Dados salvos localmente.', 'error');
                 }
-            } catch (e) {
-                console.error('Erro Google Sheets:', e);
-                showToast('⚠️ Sem conexão com a planilha. Salvo localmente.', 'error');
-            }
+            }).catch(function() {
+                showToast('💾 Salvo localmente', 'success');
+            });
         } else {
             showToast('💾 Salvo localmente (configure Google Sheets para sincronizar)', 'success');
         }
@@ -1037,28 +1056,26 @@
         membrosTime = membros;
     }
 
-    async function carregarMembros() {
-        // Tentar carregar do Google Sheets primeiro
+    function carregarMembros() {
+        // Carregar do localStorage (sempre funciona)
+        membrosTime = JSON.parse(localStorage.getItem('mapaAstral_membros') || '[]');
+        
+        // Se Google Sheets configurado, sincronizar em background
         if (isGoogleSheetsConfigured()) {
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const result = await response.json();
+            fetch(SCRIPT_URL).then(function(r) { return r.json(); })
+            .then(function(result) {
                 if (result.success && result.data && result.data.length > 0) {
                     membrosTime = result.data;
                     usandoSheets = true;
                     atualizarStatus(true);
-                    return;
+                    renderizarTime();
                 }
-            } catch (e) {
-                console.error('Erro ao carregar do Sheets:', e);
-            }
+            }).catch(function(e) {
+                console.warn('Google Sheets indisponível');
+            });
         }
-        
-        // Fallback: localStorage
-        membrosTime = JSON.parse(localStorage.getItem('mapaAstral_membros') || '[]');
         atualizarStatus(false);
     }
-
     function atualizarStatus(online) {
         const dot = document.getElementById('statusDot');
         const text = document.getElementById('statusText');
@@ -1117,8 +1134,8 @@
         document.getElementById('resultSection').classList.add('visible');
     }
 
-    async function carregarTime() {
-        await carregarMembros();
+    function carregarTime() {
+        carregarMembros();
         renderizarTime();
     }
 
@@ -1144,7 +1161,7 @@
                         <div>
                             <div class="member-name">${m.nome}</div>
                             <div class="member-signs">
-                                ${m.sol_emoji || ''} ${m.sol_nome || ''} • ⬆️ ${m.asc_nome || ''}
+                                ${m.sol_emoji || ''} ${m.sol_nome || ''} • ⬆️ ${m.asc_nome || ''}</div><div class="member-date" style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">${formatarData(m.data)} • ${m.hora || ''} • ${m.cidade || ''}
                             </div>
                         </div>
                     </div>
@@ -1158,9 +1175,8 @@
     }
 
     function gerarMatriz() {
-        carregarMembros().then(() => {
-            renderizarMatriz();
-        }).catch(e => console.error('Matrix error:', e));
+        carregarMembros();
+        renderizarMatriz();
     }
 
     function renderizarMatriz() {
@@ -1221,7 +1237,7 @@
     });
 
     // Form submission
-    document.getElementById('astralForm').addEventListener('submit', async function(e) {
+    document.getElementById('astralForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
         const nome = document.getElementById('nome').value.trim();
@@ -1234,12 +1250,15 @@
             return;
         }
         
-        const [latitude, cidadeNome] = cidadeVal.split('|');
-        const lat = parseFloat(latitude);
+        const cidadeParts = cidadeVal.split('|');
+        const lat = parseFloat(cidadeParts[0]);
+        const lon = parseFloat(cidadeParts[1]);
+        const tz = parseFloat(cidadeParts[2]);
+        const cidadeNome = cidadeParts[3];
         
         // Calcular
         const sol = calcularSignoSolar(dataNasc);
-        const asc = calcularAscendente(dataNasc, horaNasc, lat);
+        const asc = calcularAscendente(dataNasc, horaNasc, lat, lon, tz);
         const resumo = gerarResumo(sol, asc);
         
         // Exibir resultado
@@ -1252,6 +1271,8 @@
             hora: horaNasc,
             cidade: cidadeNome,
             latitude: lat,
+            longitude: lon,
+            fuso: tz,
             sol_nome: sol.nome,
             sol_emoji: sol.emoji,
             sol_elemento: sol.elemento,
@@ -1262,7 +1283,7 @@
         };
         
         try {
-            await salvarMembro(dados);
+        salvarMembro(dados);
         } catch(e) {
             console.error('Save error:', e);
         }
@@ -1270,14 +1291,8 @@
 
     // ============== INIT ==============
 
-    (async function init() {
-        try {
-            await carregarMembros();
-            atualizarStatus(usandoSheets);
-        } catch(e) {
-            console.error('Init error:', e);
-        }
-    })();
-    </script>
+    // Init
+    carregarMembros();
+    atualizarStatus(usandoSheets);    </script>
 </body>
 </html>
