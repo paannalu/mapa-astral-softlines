@@ -642,12 +642,12 @@
                 <form id="astralForm">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="nome"><i class="fas fa-user"></i> Nome</label>
-                            <input type="text" id="nome" placeholder="Seu nome ou apelido" required>
+                            <label for="nome"><i class="fas fa-user"></i> Alias</label>
+                            <input type="text" id="nome" placeholder="Seu alias/apelido" required>
                         </div>
                         <div class="form-group">
-                            <label for="dataNasc"><i class="fas fa-calendar"></i> Data de Nascimento</label>
-                            <input type="date" id="dataNasc" required>
+                            <label for="dataNasc"><i class="fas fa-calendar"></i> Data de Nascimento (dd/mm/aaaa)</label>
+                            <input type="text" id="dataNasc" placeholder="dd/mm/aaaa" maxlength="10" required>
                         </div>
                         <div class="form-group">
                             <label for="horaNasc"><i class="fas fa-clock"></i> Horário de Nascimento</label>
@@ -760,7 +760,7 @@
                 <div class="empty-state" id="teamEmpty">
                     <i class="fas fa-user-astronaut"></i>
                     <h3>Nenhum membro ainda</h3>
-                    <p>Preencha seu mapa astral na aba "Meu Mapa" para começar!</p>
+                    <p>Preencha seu mapa na aba "Meu Mapa" para começar!</p>
                 </div>
             </div>
         </div>
@@ -1147,7 +1147,7 @@
                 <div class="empty-state">
                     <i class="fas fa-user-astronaut"></i>
                     <h3>Nenhum membro ainda</h3>
-                    <p>Preencha seu mapa astral na aba "Meu Mapa" para começar!</p>
+                    <p>Preencha seu mapa na aba "Meu Mapa" para começar!</p>
                 </div>`;
             return;
         }
@@ -1161,7 +1161,7 @@
                         <div>
                             <div class="member-name">${m.nome}</div>
                             <div class="member-signs">
-                                ${m.sol_emoji || ''} ${m.sol_nome || ''} • ⬆️ ${m.asc_nome || ''}</div><div class="member-date" style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">${formatarData(m.data)} • ${m.hora || ''} • ${m.cidade || ''}
+                                ${m.sol_emoji || ''} ${m.sol_nome || ''} • ⬆️ ${m.asc_nome || ''}</div><div class="member-date" style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">${m.cidade || ''}
                             </div>
                         </div>
                     </div>
@@ -1241,7 +1241,14 @@
         e.preventDefault();
         
         const nome = document.getElementById('nome').value.trim();
-        const dataNasc = document.getElementById('dataNasc').value;
+        const dataNascRaw = document.getElementById('dataNasc').value;
+        // Converter dd/mm/aaaa → yyyy-mm-dd para cálculos internos
+        const dataParts = dataNascRaw.split('/');
+        if (dataParts.length !== 3 || dataParts[2].length !== 4) {
+            showToast('❌ Data inválida! Use o formato dd/mm/aaaa', 'error');
+            return;
+        }
+        const dataNasc = dataParts[2] + '-' + dataParts[1] + '-' + dataParts[0];
         const horaNasc = document.getElementById('horaNasc').value || '12:00';
         const cidadeVal = document.getElementById('cidade').value;
         
@@ -1290,6 +1297,15 @@
     });
 
     // ============== INIT ==============
+
+
+    // Máscara de data dd/mm/aaaa
+    document.getElementById('dataNasc').addEventListener('input', function(e) {
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+        if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5,9);
+        e.target.value = v;
+    });
 
     // Init
     carregarMembros();
