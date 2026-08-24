@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Mapa Astral do Time</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f0e17;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --text-primary: #fffffe;
+            --text-secondary: #a7a9be;
+            --accent-purple: #7f5af0;
+            --accent-purple-light: #a78bfa;
+            --accent-gold: #e2b714;
+            --accent-gold-light: #fbbf24;
+            --gradient-purple: linear-gradient(135deg, #7f5af0, #a855f7);
+            --gradient-gold: linear-gradient(135deg, #e2b714, #f59e0b);
+            --gradient-cosmic: linear-gradient(135deg, #0f0e17 0%, #1a1a2e 30%, #2d1b69 70%, #0f0e17 100%);
+            --fire-color: #ef4444;
+            --earth-color: #22c55e;
+            --air-color: #60a5fa;
+            --water-color: #06b6d4;
+            --border-subtle: rgba(127, 90, 240, 0.2);
+            --shadow-purple: 0 4px 20px rgba(127, 90, 240, 0.3);
+            --shadow-gold: 0 4px 20px rgba(226, 183, 20, 0.3);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Inter', sans-serif;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Cosmic background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(127, 90, 240, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(226, 183, 20, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-purple-light), var(--accent-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 6px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 20px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(127, 90, 240, 0.1);
+        }
+
+        .tab-btn.active {
+            background: var(--gradient-purple);
+            color: white;
+            box-shadow: var(--shadow-purple);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--accent-purple);
+            box-shadow: var(--shadow-purple);
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(127, 90, 240, 0.2);
+        }
+
+        .form-group select option {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: var(--gradient-purple);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-purple);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: transparent;
+            border: 1px solid var(--accent-purple);
+            border-radius: var(--radius-md);
+            color: var(--accent-purple-light);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(127, 90, 240, 0.1);
+        }
+
+        /* Result Card */
+        .result-section {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-section.visible {
+            display: block;
+        }
+
+        .sign-display {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .sign-card {
+            flex: 1;
+            min-width: 280px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .sign-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-purple);
+        }
+
+        .sign-emoji {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .sign-name {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+        }
+
+        .sign-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        /* Element Badges */
+        .element-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .element-fogo { background: rgba(239, 68, 68, 0.2); color: var(--fire-color); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .element-terra { background: rgba(34, 197, 94, 0.2); color: var(--earth-color); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .element-ar { background: rgba(96, 165, 250, 0.2); color: var(--air-color); border: 1px solid rgba(96, 165, 250, 0.3); }
+        .element-agua { background: rgba(6, 182, 212, 0.2); color: var(--water-color); border: 1px solid rgba(6, 182, 212, 0.3); }
+
+        /* Summary Box */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(127, 90, 240, 0.1), rgba(226, 183, 20, 0.05));
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        .summary-box h3 {
+            font-family: var(--font-display);
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+        }
+
+        .summary-box p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Compatibility */
+        .compat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .compat-item {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .compat-item.high { border-color: rgba(34, 197, 94, 0.5); }
+        .compat-item.medium { border-color: rgba(251, 191, 36, 0.5); }
+        .compat-item.low { border-color: rgba(239, 68, 68, 0.5); }
+
+        .compat-score {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .compat-item.high .compat-score { color: var(--earth-color); }
+        .compat-item.medium .compat-score { color: var(--accent-gold); }
+        .compat-item.low .compat-score { color: var(--fire-color); }
+
+        /* Team Panel */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .team-member-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: var(--transition);
+        }
+
+        .team-member-card:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-purple);
+        }
+
+        .member-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .member-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .member-signs {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .member-summary {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        /* Matrix */
+        .matrix-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        .matrix-table th,
+        .matrix-table td {
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid var(--border-subtle);
+            font-size: 0.85rem;
+        }
+
+        .matrix-table th {
+            background: var(--bg-tertiary);
+            color: var(--accent-gold);
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+        }
+
+        .matrix-table td {
+            background: var(--bg-secondary);
+        }
+
+        .matrix-cell-5 { background: rgba(34, 197, 94, 0.3) !important; color: #4ade80; font-weight: 700; }
+        .matrix-cell-4 { background: rgba(34, 197, 94, 0.15) !important; color: #86efac; }
+        .matrix-cell-3 { background: rgba(251, 191, 36, 0.15) !important; color: #fde047; }
+        .matrix-cell-2 { background: rgba(239, 68, 68, 0.15) !important; color: #fca5a5; }
+        .matrix-cell-1 { background: rgba(239, 68, 68, 0.3) !important; color: #f87171; font-weight: 700; }
+        .matrix-cell-self { background: rgba(127, 90, 240, 0.2) !important; color: var(--accent-purple-light); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--accent-purple);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-display);
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-purple);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-purple);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1000;
+            max-width: 350px;
+        }
+
+        .toast.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-color: var(--earth-color); }
+        .toast.error { border-color: var(--fire-color); }
+
+        /* Loading */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Status indicator */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--earth-color);
+        }
+
+        .status-dot.offline {
+            background: var(--accent-gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            .header {
+                padding: 24px 12px;
+            }
+            .card {
+                padding: 20px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .sign-display {
+                flex-direction: column;
+            }
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+            .tab-btn {
+                min-width: 120px;
+                font-size: 0.8rem;
+                padding: 12px 14px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-purple-light); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-star-of-life"></i> Mapa Astral do Time</h1>
+            <p>Descubra os signos, ascendentes e compatibilidades da sua equipe ✨</p>
+        </header>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Conectando...</span>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="form-tab">
+                <i class="fas fa-magic"></i> Meu Mapa
+            </button>
+            <button class="tab-btn" data-tab="team-tab">
+                <i class="fas fa-users"></i> Painel do Time
+            </button>
+            <button class="tab-btn" data-tab="compat-tab">
+                <i class="fas fa-heart"></i> Compatibilidade
+            </button>
+        </div>
+
+        <!-- Tab: Form -->
+        <div class="tab-content active" id="form-tab">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-sun"></i> Seus Dados de Nascimento</h2>
+                <form id="astralForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nome"><i class="fas fa-user"></i> Nome</label>
+                            <input type="text" id="nome" placeholder="Seu nome ou apelido" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dataNasc"><i class="fas fa-calendar"></i> Data de Nascimento</label>
+                            <input type="date" id="dataNasc" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="horaNasc"><i class="fas fa-clock"></i> Horário de Nascimento</label>
+                            <input type="time" id="horaNasc" value="12:00">
+                        </div>
+                        <div class="form-group">
+                            <label for="cidade"><i class="fas fa-map-marker-alt"></i> Cidade de Nascimento</label>
+                            <select id="cidade" required>
+                                <option value="">Selecione a cidade...</option>
+                                <optgroup label="🇧🇷 Brasil">
+                                    <option value="-23.55|São Paulo, SP">São Paulo, SP</option>
+                                    <option value="-22.91|Rio de Janeiro, RJ">Rio de Janeiro, RJ</option>
+                                    <option value="-19.92|Belo Horizonte, MG">Belo Horizonte, MG</option>
+                                    <option value="-15.78|Brasília, DF">Brasília, DF</option>
+                                    <option value="-12.97|Salvador, BA">Salvador, BA</option>
+                                    <option value="-3.72|Fortaleza, CE">Fortaleza, CE</option>
+                                    <option value="-8.05|Recife, PE">Recife, PE</option>
+                                    <option value="-30.03|Porto Alegre, RS">Porto Alegre, RS</option>
+                                    <option value="-25.43|Curitiba, PR">Curitiba, PR</option>
+                                    <option value="-2.50|Manaus, AM">Manaus, AM</option>
+                                    <option value="-1.46|Belém, PA">Belém, PA</option>
+                                    <option value="-20.32|Vitória, ES">Vitória, ES</option>
+                                    <option value="-16.68|Goiânia, GO">Goiânia, GO</option>
+                                    <option value="-27.59|Florianópolis, SC">Florianópolis, SC</option>
+                                    <option value="-5.79|Natal, RN">Natal, RN</option>
+                                </optgroup>
+                                <optgroup label="🌎 Internacional">
+                                    <option value="40.71|Nova York, EUA">Nova York, EUA</option>
+                                    <option value="51.51|Londres, UK">Londres, UK</option>
+                                    <option value="48.86|Paris, França">Paris, França</option>
+                                    <option value="35.68|Tóquio, Japão">Tóquio, Japão</option>
+                                    <option value="-33.87|Sydney, Austrália">Sydney, Austrália</option>
+                                    <option value="19.43|Cidade do México, México">Cidade do México, México</option>
+                                    <option value="55.76|Moscou, Rússia">Moscou, Rússia</option>
+                                    <option value="-34.60|Buenos Aires, Argentina">Buenos Aires, Argentina</option>
+                                    <option value="28.61|Nova Delhi, Índia">Nova Delhi, Índia</option>
+                                    <option value="1.35|Singapura">Singapura</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" id="btnSubmit">
+                        <i class="fas fa-stars"></i> Gerar Mapa Astral
+                    </button>
+                </form>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-section" id="resultSection">
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-sparkles"></i> Seu Mapa Astral</h2>
+                    <div class="sign-display">
+                        <div class="sign-card" id="solCard">
+                            <div class="sign-label">☀️ Signo Solar</div>
+                            <div class="sign-emoji" id="solEmoji"></div>
+                            <div class="sign-name" id="solNome"></div>
+                            <div id="solElemento"></div>
+                        </div>
+                        <div class="sign-card" id="ascCard">
+                            <div class="sign-label">⬆️ Ascendente</div>
+                            <div class="sign-emoji" id="ascEmoji"></div>
+                            <div class="sign-name" id="ascNome"></div>
+                            <div id="ascElemento"></div>
+                        </div>
+                    </div>
+
+                    <div class="summary-box">
+                        <h3><i class="fas fa-scroll"></i> Resumo de Personalidade</h3>
+                        <p id="resumoTexto"></p>
+                    </div>
+
+                    <div class="summary-box" style="margin-top: 16px;">
+                        <h3><i class="fas fa-heart"></i> Compatibilidade</h3>
+                        <p style="margin-bottom: 12px; font-size: 0.9rem;">Signos que mais combinam e menos combinam com você:</p>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div>
+                                <strong style="color: var(--earth-color);">✅ Mais compatíveis:</strong>
+                                <div class="compat-grid" id="compatAlta" style="grid-template-columns: repeat(2, 1fr);"></div>
+                            </div>
+                            <div>
+                                <strong style="color: var(--fire-color);">⚠️ Menos compatíveis:</strong>
+                                <div class="compat-grid" id="compatBaixa" style="grid-template-columns: repeat(2, 1fr);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Team Panel -->
+        <div class="tab-content" id="team-tab">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-users"></i> Painel do Time</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Todos os membros que já preencheram o mapa astral.
+                </p>
+                <button class="btn-secondary" onclick="carregarTime()">
+                    <i class="fas fa-sync-alt"></i> Atualizar
+                </button>
+            </div>
+            <div class="team-grid" id="teamGrid">
+                <div class="empty-state" id="teamEmpty">
+                    <i class="fas fa-user-astronaut"></i>
+                    <h3>Nenhum membro ainda</h3>
+                    <p>Preencha seu mapa astral na aba "Meu Mapa" para começar!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Compatibility Matrix -->
+        <div class="tab-content" id="compat-tab">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-heart"></i> Matriz de Compatibilidade</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Score de 1 a 5 entre cada dupla do time, baseado nos elementos dos signos.
+                </p>
+                <button class="btn-secondary" onclick="gerarMatriz()">
+                    <i class="fas fa-sync-alt"></i> Atualizar Matriz
+                </button>
+            </div>
+            <div class="card">
+                <div class="matrix-wrapper" id="matrixWrapper">
+                    <div class="empty-state" id="matrixEmpty">
+                        <i class="fas fa-th"></i>
+                        <h3>Matriz indisponível</h3>
+                        <p>É necessário pelo menos 2 membros no time para gerar a matriz.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+    // Global handler to prevent UnhandledPromiseRejection errors
+    window.addEventListener('unhandledrejection', function(event) {
+        event.preventDefault();
+        console.warn('Promise rejection handled:', event.reason);
+    });
+
+    // ============================================================
+    // CONFIGURAÇÃO - Cole aqui a URL do seu Google Apps Script
+    // ============================================================
+    const SCRIPT_URL = 'COLE_SUA_URL_AQUI';
+    // ============================================================
+
+    // ============== DADOS ASTROLÓGICOS ==============
+
+    const SIGNOS = [
+        { nome: 'Áries', emoji: '♈', elemento: 'Fogo', inicio: [3, 21], fim: [4, 19] },
+        { nome: 'Touro', emoji: '♉', elemento: 'Terra', inicio: [4, 20], fim: [5, 20] },
+        { nome: 'Gêmeos', emoji: '♊', elemento: 'Ar', inicio: [5, 21], fim: [6, 20] },
+        { nome: 'Câncer', emoji: '♋', elemento: 'Água', inicio: [6, 21], fim: [7, 22] },
+        { nome: 'Leão', emoji: '♌', elemento: 'Fogo', inicio: [7, 23], fim: [8, 22] },
+        { nome: 'Virgem', emoji: '♍', elemento: 'Terra', inicio: [8, 23], fim: [9, 22] },
+        { nome: 'Libra', emoji: '♎', elemento: 'Ar', inicio: [9, 23], fim: [10, 22] },
+        { nome: 'Escorpião', emoji: '♏', elemento: 'Água', inicio: [10, 23], fim: [11, 21] },
+        { nome: 'Sagitário', emoji: '♐', elemento: 'Fogo', inicio: [11, 22], fim: [12, 21] },
+        { nome: 'Capricórnio', emoji: '♑', elemento: 'Terra', inicio: [12, 22], fim: [1, 19] },
+        { nome: 'Aquário', emoji: '♒', elemento: 'Ar', inicio: [1, 20], fim: [2, 18] },
+        { nome: 'Peixes', emoji: '♓', elemento: 'Água', inicio: [2, 19], fim: [3, 20] }
+    ];
+
+    const ELEMENTOS_EMOJI = { 'Fogo': '🔥', 'Terra': '🌍', 'Ar': '💨', 'Água': '💧' };
+    const ELEMENTOS_CLASS = { 'Fogo': 'element-fogo', 'Terra': 'element-terra', 'Ar': 'element-ar', 'Água': 'element-agua' };
+
+    // Compatibilidade entre elementos (score 1-5)
+    const COMPAT_ELEMENTOS = {
+        'Fogo-Fogo': 4, 'Fogo-Terra': 2, 'Fogo-Ar': 5, 'Fogo-Água': 2,
+        'Terra-Fogo': 2, 'Terra-Terra': 4, 'Terra-Ar': 2, 'Terra-Água': 5,
+        'Ar-Fogo': 5, 'Ar-Terra': 2, 'Ar-Ar': 4, 'Ar-Água': 3,
+        'Água-Fogo': 2, 'Água-Terra': 5, 'Água-Ar': 3, 'Água-Água': 4
+    };
+
+    // Personalidades por signo
+    const PERSONALIDADES = {
+        'Áries': 'corajoso(a), pioneiro(a) e cheio(a) de energia. Lidera com ousadia.',
+        'Touro': 'estável, determinado(a) e aprecia o conforto. Traz solidez ao time.',
+        'Gêmeos': 'comunicativo(a), versátil e curioso(a). Conecta ideias e pessoas.',
+        'Câncer': 'intuitivo(a), protetor(a) e emocional. Cuida do bem-estar do grupo.',
+        'Leão': 'carismático(a), generoso(a) e criativo(a). Inspira e motiva todos.',
+        'Virgem': 'detalhista, analítico(a) e prestativo(a). Garante qualidade e ordem.',
+        'Libra': 'diplomático(a), justo(a) e harmonioso(a). Busca equilíbrio nas relações.',
+        'Escorpião': 'intenso(a), estratégico(a) e transformador(a). Vai fundo nos desafios.',
+        'Sagitário': 'otimista, aventureiro(a) e filosófico(a). Expande horizontes do time.',
+        'Capricórnio': 'disciplinado(a), ambicioso(a) e responsável. Constrói com persistência.',
+        'Aquário': 'inovador(a), independente e humanitário(a). Traz visão de futuro.',
+        'Peixes': 'empático(a), criativo(a) e intuitivo(a). Sente as necessidades do grupo.'
+    };
+
+    const ASC_INFLUENCIA = {
+        'Áries': 'Sua primeira impressão é de alguém direto e energético.',
+        'Touro': 'Transmite calma, estabilidade e confiança ao primeiro contato.',
+        'Gêmeos': 'Parece acessível, comunicativo e mentalmente ágil.',
+        'Câncer': 'Passa acolhimento e sensibilidade nos primeiros encontros.',
+        'Leão': 'Chega com presença marcante e carisma natural.',
+        'Virgem': 'Apresenta-se de forma organizada, educada e atenta aos detalhes.',
+        'Libra': 'Transmite elegância, charme e busca de harmonia.',
+        'Escorpião': 'Tem uma aura magnética e misteriosa que atrai olhares.',
+        'Sagitário': 'Aparenta ser descontraído, otimista e aventureiro.',
+        'Capricórnio': 'Passa seriedade, competência e maturidade.',
+        'Aquário': 'Parece original, desapegado de convenções e intelectual.',
+        'Peixes': 'Transmite suavidade, empatia e um ar sonhador.'
+    };
+
+    // ============== CÁLCULOS ASTROLÓGICOS ==============
+
+    function calcularSignoSolar(data) {
+        const [ano, mes, dia] = data.split('-').map(Number);
+        
+        for (const signo of SIGNOS) {
+            const [mesIni, diaIni] = signo.inicio;
+            const [mesFim, diaFim] = signo.fim;
+            
+            // Caso especial: Capricórnio cruza a virada do ano
+            if (mesIni > mesFim) {
+                if ((mes === mesIni && dia >= diaIni) || (mes === mesFim && dia <= diaFim)) {
+                    return signo;
+                }
+            } else {
+                if ((mes === mesIni && dia >= diaIni) || (mes === mesFim && dia <= diaFim)) {
+                    return signo;
+                }
+                if (mes > mesIni && mes < mesFim) {
+                    return signo;
+                }
+            }
+        }
+        return SIGNOS[0]; // fallback
+    }
+
+    function calcularAscendente(data, hora, latitude) {
+        // Cálculo simplificado de ascendente baseado em tempo sideral
+        // Fórmula: Tempo Sideral Local → Signo Ascendente
+        
+        const [ano, mes, dia] = data.split('-').map(Number);
+        const [h, m] = hora.split(':').map(Number);
+        
+        // Dia Juliano simplificado (J2000.0 epoch)
+        const a = Math.floor((14 - mes) / 12);
+        const y = ano + 4800 - a;
+        const mj = mes + 12 * a - 3;
+        const JD = dia + Math.floor((153 * mj + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+        
+        // Século Juliano desde J2000.0
+        const T = (JD - 2451545.0) / 36525.0;
+        
+        // Tempo Sideral em Greenwich (em graus) - fórmula simplificada
+        let GST = 280.46061837 + 360.98564736629 * (JD - 2451545.0) + 0.000387933 * T * T;
+        GST = GST % 360;
+        if (GST < 0) GST += 360;
+        
+        // Adicionar hora local (convertida para graus)
+        const horaDecimal = h + m / 60;
+        const horaGraus = horaDecimal * 15; // 15 graus por hora
+        
+        // Tempo Sideral Local (aproximado - sem longitude exata, usamos ajuste pela latitude)
+        let LST = GST + horaGraus;
+        
+        // Ajuste pela latitude (fórmula simplificada do ascendente)
+        // RAMC (Right Ascension of Medium Coeli) = LST
+        // Ascendente = atan(-cos(RAMC) / (sin(ε) * tan(φ) + cos(ε) * sin(RAMC)))
+        // ε (obliquidade da eclíptica) ≈ 23.44°
+        
+        const latRad = latitude * Math.PI / 180;
+        const epsilon = 23.44 * Math.PI / 180; // obliquidade
+        const ramcRad = (LST % 360) * Math.PI / 180;
+        
+        let ascRad = Math.atan2(
+            -Math.cos(ramcRad),
+            Math.sin(epsilon) * Math.tan(latRad) + Math.cos(epsilon) * Math.sin(ramcRad)
+        );
+        
+        let ascDeg = (ascRad * 180 / Math.PI + 360) % 360;
+        
+        // Converter graus para índice de signo (cada signo = 30°)
+        const signoIndex = Math.floor(ascDeg / 30) % 12;
+        
+        return SIGNOS[signoIndex];
+    }
+
+    function gerarResumo(sol, asc) {
+        const perSol = PERSONALIDADES[sol.nome];
+        const infAsc = ASC_INFLUENCIA[asc.nome];
+        
+        let resumo = `Com Sol em ${sol.nome} (${sol.emoji} ${ELEMENTOS_EMOJI[sol.elemento]} ${sol.elemento}), você é ${perSol} `;
+        resumo += `\n\nCom Ascendente em ${asc.nome} (${asc.emoji} ${ELEMENTOS_EMOJI[asc.elemento]} ${asc.elemento}): ${infAsc} `;
+        
+        // Combinação dos elementos
+        if (sol.elemento === asc.elemento) {
+            resumo += `\n\n✨ Sol e Ascendente no mesmo elemento (${sol.elemento}) traz coerência: quem você é por dentro é exatamente o que demonstra por fora.`;
+        } else {
+            const compatKey = `${sol.elemento}-${asc.elemento}`;
+            const score = COMPAT_ELEMENTOS[compatKey] || 3;
+            if (score >= 4) {
+                resumo += `\n\n✨ A combinação ${sol.elemento} + ${asc.elemento} é harmoniosa: sua essência e sua imagem se complementam bem.`;
+            } else if (score <= 2) {
+                resumo += `\n\n🌀 A combinação ${sol.elemento} + ${asc.elemento} gera tensão criativa: há um contraste interessante entre quem você é e como se apresenta.`;
+            } else {
+                resumo += `\n\n🔮 ${sol.elemento} + ${asc.elemento} cria uma dinâmica versátil: você transita entre diferentes energias com flexibilidade.`;
+            }
+        }
+        
+        return resumo;
+    }
+
+    function obterCompatibilidade(signo) {
+        const elem = signo.elemento;
+        const alta = [];
+        const baixa = [];
+        
+        for (const s of SIGNOS) {
+            if (s.nome === signo.nome) continue;
+            const key = `${elem}-${s.elemento}`;
+            const score = COMPAT_ELEMENTOS[key] || 3;
+            if (score >= 4) alta.push(s);
+            else if (score <= 2) baixa.push(s);
+        }
+        
+        return { alta, baixa };
+    }
+
+    function calcularCompatDupla(membro1, membro2) {
+        // Score baseado nos elementos de Sol e Ascendente de ambos
+        const keySolSol = `${membro1.sol_elemento}-${membro2.sol_elemento}`;
+        const keyAscAsc = `${membro1.asc_elemento}-${membro2.asc_elemento}`;
+        const keySolAsc = `${membro1.sol_elemento}-${membro2.asc_elemento}`;
+        const keyAscSol = `${membro1.asc_elemento}-${membro2.sol_elemento}`;
+        
+        const s1 = COMPAT_ELEMENTOS[keySolSol] || 3;
+        const s2 = COMPAT_ELEMENTOS[keyAscAsc] || 3;
+        const s3 = COMPAT_ELEMENTOS[keySolAsc] || 3;
+        const s4 = COMPAT_ELEMENTOS[keyAscSol] || 3;
+        
+        // Média ponderada (Sol-Sol tem mais peso)
+        const media = (s1 * 2 + s2 * 1.5 + s3 + s4) / 5.5;
+        return Math.round(Math.min(5, Math.max(1, media)));
+    }
+
+    // ============== STORAGE (localStorage + Google Sheets) ==============
+
+    let membrosTime = [];
+    let usandoSheets = false;
+
+    function isGoogleSheetsConfigured() {
+        return SCRIPT_URL && SCRIPT_URL !== 'COLE_SUA_URL_AQUI' && SCRIPT_URL.includes('script.google.com');
+    }
+
+    async function salvarMembro(dados) {
+        // Sempre salvar no localStorage
+        salvarLocalStorage(dados);
+        
+        if (isGoogleSheetsConfigured()) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(dados)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('✅ Salvo na planilha com sucesso!', 'success');
+                    usandoSheets = true;
+                } else {
+                    showToast('⚠️ Erro ao salvar na planilha. Salvo localmente.', 'error');
+                }
+            } catch (e) {
+                console.error('Erro Google Sheets:', e);
+                showToast('⚠️ Sem conexão com a planilha. Salvo localmente.', 'error');
+            }
+        } else {
+            showToast('💾 Salvo localmente (configure Google Sheets para sincronizar)', 'success');
+        }
+    }
+
+    function salvarLocalStorage(dados) {
+        let membros = JSON.parse(localStorage.getItem('mapaAstral_membros') || '[]');
+        const idx = membros.findIndex(m => m.nome.toLowerCase().trim() === dados.nome.toLowerCase().trim());
+        if (idx >= 0) {
+            membros[idx] = dados;
+        } else {
+            membros.push(dados);
+        }
+        localStorage.setItem('mapaAstral_membros', JSON.stringify(membros));
+        membrosTime = membros;
+    }
+
+    async function carregarMembros() {
+        // Tentar carregar do Google Sheets primeiro
+        if (isGoogleSheetsConfigured()) {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const result = await response.json();
+                if (result.success && result.data && result.data.length > 0) {
+                    membrosTime = result.data;
+                    usandoSheets = true;
+                    atualizarStatus(true);
+                    return;
+                }
+            } catch (e) {
+                console.error('Erro ao carregar do Sheets:', e);
+            }
+        }
+        
+        // Fallback: localStorage
+        membrosTime = JSON.parse(localStorage.getItem('mapaAstral_membros') || '[]');
+        atualizarStatus(false);
+    }
+
+    function atualizarStatus(online) {
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        
+        if (online) {
+            dot.className = 'status-dot';
+            text.textContent = `Google Sheets conectado • ${membrosTime.length} membro(s)`;
+        } else if (isGoogleSheetsConfigured()) {
+            dot.className = 'status-dot offline';
+            text.textContent = 'Offline — usando dados locais';
+        } else {
+            dot.className = 'status-dot offline';
+            text.textContent = `Modo local (configure Google Sheets) • ${membrosTime.length} membro(s)`;
+        }
+    }
+
+    // ============== UI FUNCTIONS ==============
+
+    function criarBadgeElemento(elemento) {
+        const cls = ELEMENTOS_CLASS[elemento] || 'element-ar';
+        const emoji = ELEMENTOS_EMOJI[elemento] || '✨';
+        return `<span class="element-badge ${cls}">${emoji} ${elemento}</span>`;
+    }
+
+    function showToast(msg, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = `toast visible ${type}`;
+        setTimeout(() => { toast.className = 'toast'; }, 4000);
+    }
+
+    function exibirResultado(sol, asc, resumo) {
+        document.getElementById('solEmoji').textContent = sol.emoji;
+        document.getElementById('solNome').textContent = sol.nome;
+        document.getElementById('solElemento').innerHTML = criarBadgeElemento(sol.elemento);
+        
+        document.getElementById('ascEmoji').textContent = asc.emoji;
+        document.getElementById('ascNome').textContent = asc.nome;
+        document.getElementById('ascElemento').innerHTML = criarBadgeElemento(asc.elemento);
+        
+        document.getElementById('resumoTexto').textContent = resumo;
+        
+        // Compatibilidade individual
+        const compat = obterCompatibilidade(sol);
+        const altaDiv = document.getElementById('compatAlta');
+        const baixaDiv = document.getElementById('compatBaixa');
+        
+        altaDiv.innerHTML = compat.alta.map(s => 
+            `<div class="compat-item high"><div>${s.emoji}</div><div style="font-size:0.8rem;">${s.nome}</div></div>`
+        ).join('');
+        
+        baixaDiv.innerHTML = compat.baixa.map(s => 
+            `<div class="compat-item low"><div>${s.emoji}</div><div style="font-size:0.8rem;">${s.nome}</div></div>`
+        ).join('');
+        
+        document.getElementById('resultSection').classList.add('visible');
+    }
+
+    async function carregarTime() {
+        await carregarMembros();
+        renderizarTime();
+    }
+
+    function renderizarTime() {
+        const grid = document.getElementById('teamGrid');
+        
+        if (membrosTime.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-user-astronaut"></i>
+                    <h3>Nenhum membro ainda</h3>
+                    <p>Preencha seu mapa astral na aba "Meu Mapa" para começar!</p>
+                </div>`;
+            return;
+        }
+        
+        grid.innerHTML = membrosTime.map(m => {
+            const inicial = (m.nome || '?')[0].toUpperCase();
+            return `
+                <div class="team-member-card">
+                    <div class="member-header">
+                        <div class="member-avatar">${inicial}</div>
+                        <div>
+                            <div class="member-name">${m.nome}</div>
+                            <div class="member-signs">
+                                ${m.sol_emoji || ''} ${m.sol_nome || ''} • ⬆️ ${m.asc_nome || ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        ${criarBadgeElemento(m.sol_elemento || 'Ar')}
+                        ${criarBadgeElemento(m.asc_elemento || 'Ar')}
+                    </div>
+                    <div class="member-summary">${(m.resumo || '').substring(0, 200)}${(m.resumo || '').length > 200 ? '...' : ''}</div>
+                </div>`;
+        }).join('');
+    }
+
+    function gerarMatriz() {
+        carregarMembros().then(() => {
+            renderizarMatriz();
+        }).catch(e => console.error('Matrix error:', e));
+    }
+
+    function renderizarMatriz() {
+        const wrapper = document.getElementById('matrixWrapper');
+        
+        if (membrosTime.length < 2) {
+            wrapper.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-th"></i>
+                    <h3>Matriz indisponível</h3>
+                    <p>É necessário pelo menos 2 membros no time para gerar a matriz.</p>
+                </div>`;
+            return;
+        }
+        
+        let html = '<table class="matrix-table"><thead><tr><th></th>';
+        
+        // Headers
+        membrosTime.forEach(m => {
+            html += `<th>${(m.nome || '').split(' ')[0]}<br>${m.sol_emoji || ''}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+        
+        // Rows
+        membrosTime.forEach((m1, i) => {
+            html += `<tr><th>${(m1.nome || '').split(' ')[0]} ${m1.sol_emoji || ''}</th>`;
+            membrosTime.forEach((m2, j) => {
+                if (i === j) {
+                    html += `<td class="matrix-cell-self">⭐</td>`;
+                } else {
+                    const score = calcularCompatDupla(m1, m2);
+                    const stars = '★'.repeat(score) + '☆'.repeat(5 - score);
+                    html += `<td class="matrix-cell-${score}"><div style="font-size:1.1rem;">${score}</div><div style="font-size:0.7rem;">${stars}</div></td>`;
+                }
+            });
+            html += '</tr>';
+        });
+        
+        html += '</tbody></table>';
+        wrapper.innerHTML = html;
+    }
+
+    // ============== EVENT HANDLERS ==============
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+            
+            // Load data when switching tabs
+            if (btn.dataset.tab === 'team-tab') carregarTime();
+            if (btn.dataset.tab === 'compat-tab') gerarMatriz();
+        });
+    });
+
+    // Form submission
+    document.getElementById('astralForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const nome = document.getElementById('nome').value.trim();
+        const dataNasc = document.getElementById('dataNasc').value;
+        const horaNasc = document.getElementById('horaNasc').value || '12:00';
+        const cidadeVal = document.getElementById('cidade').value;
+        
+        if (!nome || !dataNasc || !cidadeVal) {
+            showToast('❌ Preencha todos os campos obrigatórios', 'error');
+            return;
+        }
+        
+        const [latitude, cidadeNome] = cidadeVal.split('|');
+        const lat = parseFloat(latitude);
+        
+        // Calcular
+        const sol = calcularSignoSolar(dataNasc);
+        const asc = calcularAscendente(dataNasc, horaNasc, lat);
+        const resumo = gerarResumo(sol, asc);
+        
+        // Exibir resultado
+        exibirResultado(sol, asc, resumo);
+        
+        // Salvar
+        const dados = {
+            nome,
+            data: dataNasc,
+            hora: horaNasc,
+            cidade: cidadeNome,
+            latitude: lat,
+            sol_nome: sol.nome,
+            sol_emoji: sol.emoji,
+            sol_elemento: sol.elemento,
+            asc_nome: asc.nome,
+            asc_emoji: asc.emoji,
+            asc_elemento: asc.elemento,
+            resumo
+        };
+        
+        try {
+            await salvarMembro(dados);
+        } catch(e) {
+            console.error('Save error:', e);
+        }
+    });
+
+    // ============== INIT ==============
+
+    (async function init() {
+        try {
+            await carregarMembros();
+            atualizarStatus(usandoSheets);
+        } catch(e) {
+            console.error('Init error:', e);
+        }
+    })();
+    </script>
+</body>
+</html>
