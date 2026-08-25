@@ -630,6 +630,38 @@
             border-color: var(--accent-purple-light);
             color: var(--text-primary);
         }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-body);
+        }
+        .btn-action:hover {
+            color: var(--text-primary);
+            border-color: var(--accent-purple-light);
+        }
+        .btn-delete:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .btn-edit:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
     </style>
 </head>
 <body>
@@ -1219,6 +1251,14 @@
                         ${criarBadgeElemento(m.asc_elemento || 'Ar')}
                     </div>
                     <div class="member-summary">${(m.resumo || '').substring(0, 200)}${(m.resumo || '').length > 200 ? '...' : ''}</div>
+                    <div class="card-actions">
+                        <button class="btn-action btn-edit" onclick="editarMembro('${m.nome}')" title="Editar">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deletarMembro('${m.nome}')" title="Deletar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>`;
         }).join('');
     }
@@ -1409,6 +1449,63 @@
             solManual.setAttribute('required', '');
             ascManual.setAttribute('required', '');
         }
+    }
+
+
+    // Editar membro - preenche o formulário com os dados e volta para aba "Meu Mapa"
+    function editarMembro(nome) {
+        const membro = membrosTime.find(m => m.nome === nome);
+        if (!membro) return;
+        
+        // Preencher formulário
+        document.getElementById('nome').value = membro.nome;
+        
+        if (membro.data && membro.data !== '') {
+            // Modo automático - converter yyyy-mm-dd para dd/mm/aaaa
+            setMode('calc');
+            const parts = membro.data.split('-');
+            if (parts.length === 3) {
+                document.getElementById('dataNasc').value = parts[2] + '/' + parts[1] + '/' + parts[0];
+            }
+            document.getElementById('horaNasc').value = membro.hora || '12:00';
+        } else {
+            // Modo manual
+            setMode('manual');
+            document.getElementById('solManual').value = membro.sol_nome || '';
+            document.getElementById('ascManual').value = membro.asc_nome || '';
+        }
+        
+        // Ir para aba "Meu Mapa"
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelector('[data-tab="form-tab"]').classList.add('active');
+        document.getElementById('form-tab').classList.add('active');
+        
+        showToast('✏️ Editando ' + nome + ' — ajuste e clique em Cadastrar', 'success');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    // Deletar membro
+    function deletarMembro(nome) {
+        if (!confirm('Tem certeza que quer remover "' + nome + '" do time?')) return;
+        
+        // Remover do localStorage
+        membrosTime = membrosTime.filter(m => m.nome !== nome);
+        localStorage.setItem('mapaAstral_membros', JSON.stringify(membrosTime));
+        
+        // Se Google Sheets está configurado, tentar deletar de lá também
+        if (isGoogleSheetsConfigured()) {
+            fetch(SCRIPT_URL + '?action=delete&nome=' + encodeURIComponent(nome))
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    showToast('🗑️ ' + nome + ' removido da planilha', 'success');
+                }
+            }).catch(function() {});
+        }
+        
+        showToast('🗑️ ' + nome + ' removido do time', 'success');
+        renderizarTime();
     }
 
     // Máscara de data dd/mm/aaaa
