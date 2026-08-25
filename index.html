@@ -1342,19 +1342,29 @@
         const asc1 = membro1.asc_elemento || sol1;
         const asc2 = membro2.asc_elemento || sol2;
         
-        const keySolSol = sol1 + '-' + sol2;
-        const keyAscAsc = asc1 + '-' + asc2;
-        const keySolAsc = sol1 + '-' + asc2;
-        const keyAscSol = asc1 + '-' + sol2;
+        function getCompat(e1, e2) {
+            return COMPAT_ELEMENTOS[e1 + '-' + e2] || COMPAT_ELEMENTOS[e2 + '-' + e1] || 3;
+        }
         
-        const s1 = COMPAT_ELEMENTOS[keySolSol] || COMPAT_ELEMENTOS[sol2 + '-' + sol1] || 3;
-        const s2 = COMPAT_ELEMENTOS[keyAscAsc] || COMPAT_ELEMENTOS[asc2 + '-' + asc1] || 3;
-        const s3 = COMPAT_ELEMENTOS[keySolAsc] || COMPAT_ELEMENTOS[asc2 + '-' + sol1] || 3;
-        const s4 = COMPAT_ELEMENTOS[keyAscSol] || COMPAT_ELEMENTOS[sol2 + '-' + asc1] || 3;
+        const s1 = getCompat(sol1, sol2);  // Sol-Sol (principal)
+        const s2 = getCompat(asc1, asc2);  // Asc-Asc
+        const s3 = getCompat(sol1, asc2);  // Sol1-Asc2
+        const s4 = getCompat(asc1, sol2);  // Asc1-Sol2
         
-        // Média ponderada (Sol-Sol tem mais peso)
-        const media = (s1 * 2 + s2 * 1.5 + s3 + s4) / 5.5;
-        return Math.round(Math.min(5, Math.max(1, media)));
+        // Fórmula: Sol-Sol é dominante (60%), ascendentes são complementares (40%)
+        // Isso gera mais variação nos resultados
+        const base = s1;  // Score principal
+        const bonus = (s2 + s3 + s4) / 3;  // Média dos ascendentes
+        
+        // Combinar: 60% sol-sol + 40% complementares, com arredondamento que diferencia mais
+        const media = base * 0.6 + bonus * 0.4;
+        
+        // Mapear para 1-5 com mais diferenciação
+        if (media >= 4.5) return 5;
+        if (media >= 3.8) return 4;
+        if (media >= 3.0) return 3;
+        if (media >= 2.3) return 2;
+        return 1;
     }
 
     // ============== STORAGE (localStorage + Google Sheets) ==============
