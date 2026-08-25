@@ -1749,8 +1749,9 @@
             }
         }
         
-        // Ordenar do mais compatível para o menos
+        // Ordenar do mais compatível para o menos — mostrar apenas Top 10
         duplas.sort(function(a, b) { return b.score - a.score; });
+        duplas = duplas.slice(0, 10);
         
         function renderList(items) {
             return items.map(function(d, idx) {
