@@ -832,6 +832,65 @@
             color: var(--text-primary);
             line-height: 1.5;
         }
+
+        /* Elemento do Mês */
+        .mes-card {
+            background: linear-gradient(135deg, rgba(127,90,240,0.1), rgba(226,183,20,0.05));
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .mes-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+        .mes-emoji { font-size: 2.5rem; }
+        .mes-titulo { font-size: 1.1rem; font-weight: 700; color: var(--accent-gold); }
+        .mes-subtitulo { font-size: 0.8rem; color: var(--text-secondary); }
+        .mes-dica { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; }
+        .mes-energia { font-size: 0.8rem; color: var(--accent-purple-light); padding: 8px 12px; background: rgba(127,90,240,0.1); border-radius: 6px; display: inline-block; }
+        
+        /* Mural */
+        .mural-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .mural-element-group {
+            border: 1px solid;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+        .mural-element-group:hover { transform: translateY(-2px); }
+        .mural-element-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-wrap: wrap;
+        }
+        .mural-element-icon { font-size: 1.5rem; }
+        .mural-element-name { font-size: 1.1rem; font-weight: 700; }
+        .mural-element-desc { font-size: 0.7rem; color: var(--text-secondary); width: 100%; }
+        .mural-members { display: flex; flex-direction: column; gap: 10px; }
+        .mural-member {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            background: rgba(0,0,0,0.2);
+        }
+        .mural-member-emoji { font-size: 1.3rem; }
+        .mural-member-name { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
+        .mural-member-title { font-size: 0.72rem; color: var(--accent-gold); font-style: italic; }
+        .mural-member-signs { font-size: 0.7rem; color: var(--text-secondary); margin-left: auto; }
     </style>
 </head>
 <body>
@@ -858,6 +917,9 @@
             </button>
             <button class="tab-btn" data-tab="compat-tab">
                 <i class="fas fa-people-arrows"></i> Compatibilidade
+            </button>
+            <button class="tab-btn" data-tab="mural-tab">
+                <i class="fas fa-palette"></i> Mural
             </button>
         </div>
 
@@ -973,6 +1035,9 @@
                         </div>
                     </div>
 
+                    <div style="text-align:center; margin-bottom:16px;">
+                        <div id="tituloAstral" style="font-size:1.1rem; color:var(--accent-gold); font-weight:600; font-style:italic;"></div>
+                    </div>
                     <div class="summary-box">
                         <h3><i class="fas fa-scroll"></i> Resumo de Personalidade</h3>
                         <p id="resumoTexto"></p>
@@ -998,6 +1063,9 @@
 
         <!-- Tab: Team Panel -->
         <div class="tab-content" id="team-tab">
+            <!-- Elemento do Mês -->
+            <div id="elementoDoMes"></div>
+            
             <div class="card">
                 <h2 class="card-title"><i class="fas fa-users"></i> Painel do Time</h2>
                 <p style="color: var(--text-secondary); margin-bottom: 20px;">
@@ -1411,6 +1479,10 @@
         
         document.getElementById('resumoTexto').textContent = resumo;
         
+        // Mostrar título astral
+        var tituloEl = document.getElementById('tituloAstral');
+        if (tituloEl) tituloEl.textContent = '✦ ' + gerarTituloAstral(sol.nome, asc.nome);
+        
         // Compatibilidade individual
         const compat = obterCompatibilidade(sol);
         const altaDiv = document.getElementById('compatAlta');
@@ -1431,6 +1503,7 @@
         carregarMembros();
         renderizarTime();
         renderTeamProfile();
+        renderElementoDoMes();
     }
 
     function renderizarTime() {
@@ -1454,6 +1527,7 @@
                         <div class="member-avatar">${inicial}</div>
                         <div>
                             <div class="member-name">${m.nome}</div>
+                            <div class="member-title" style="font-size:0.7rem;color:var(--accent-gold);font-style:italic;margin-bottom:2px;">✦ ${gerarTituloAstral(m.sol_nome || '', m.asc_nome || '')}</div>
                             <div class="member-signs">
                                 ${m.sol_emoji || ''} ${m.sol_nome || ''} • ⬆️ ${m.asc_nome || ''}</div><div class="member-date" style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">${m.cidade || ''}
                             </div>
@@ -1559,6 +1633,7 @@
             // Load data when switching tabs
             if (btn.dataset.tab === 'team-tab') carregarTime();
             if (btn.dataset.tab === 'compat-tab') gerarMatriz();
+            if (btn.dataset.tab === 'mural-tab') { carregarMembros(); renderMural(); }
         });
     });
 
@@ -2185,6 +2260,301 @@
         
         textDiv.innerHTML = texto;
     }
+
+    // Gerar título astral personalizado (Superpoder) baseado em Sol + Ascendente
+    function gerarTituloAstral(solNome, ascNome) {
+        var titulos = {
+            // Fogo + X
+            'Áries-Áries': 'A Força Imparável',
+            'Áries-Touro': 'O Motor Incansável',
+            'Áries-Gêmeos': 'O Comunicador Veloz',
+            'Áries-Câncer': 'O Protetor Corajoso',
+            'Áries-Leão': 'O Líder Magnético',
+            'Áries-Virgem': 'O Estrategista Rápido',
+            'Áries-Libra': 'O Diplomata Ousado',
+            'Áries-Escorpião': 'O Investigador Intrépido',
+            'Áries-Sagitário': 'O Explorador Nato',
+            'Áries-Capricórnio': 'O Construtor Audaz',
+            'Áries-Aquário': 'O Revolucionário',
+            'Áries-Peixes': 'O Visionário em Ação',
+            'Touro-Áries': 'O Executivo Decidido',
+            'Touro-Touro': 'A Rocha Inabalável',
+            'Touro-Gêmeos': 'O Articulador Prático',
+            'Touro-Câncer': 'O Porto Seguro',
+            'Touro-Leão': 'O Anfitrião Nato',
+            'Touro-Virgem': 'O Perfeccionista Zen',
+            'Touro-Libra': 'O Curador de Ambientes',
+            'Touro-Escorpião': 'A Determinação em Pessoa',
+            'Touro-Sagitário': 'O Filósofo Prático',
+            'Touro-Capricórnio': 'O Mestre da Consistência',
+            'Touro-Aquário': 'O Inovador Pé no Chão',
+            'Touro-Peixes': 'O Artista Sensível',
+            'Gêmeos-Áries': 'O Multitarefas Turbo',
+            'Gêmeos-Touro': 'O Comunicador Confiável',
+            'Gêmeos-Gêmeos': 'O Conector Universal',
+            'Gêmeos-Câncer': 'O Storyteller do Time',
+            'Gêmeos-Leão': 'O Apresentador Brilhante',
+            'Gêmeos-Virgem': 'O Analista Ágil',
+            'Gêmeos-Libra': 'O Mediador Social',
+            'Gêmeos-Escorpião': 'O Detetive Comunicativo',
+            'Gêmeos-Sagitário': 'O Eterno Curioso',
+            'Gêmeos-Capricórnio': 'O Estrategista Versátil',
+            'Gêmeos-Aquário': 'O Gênio Inventivo',
+            'Gêmeos-Peixes': 'O Poeta das Ideias',
+            'Câncer-Áries': 'O Cuidador Corajoso',
+            'Câncer-Touro': 'O Guardião Leal',
+            'Câncer-Gêmeos': 'O Acolhedor Comunicativo',
+            'Câncer-Câncer': 'O Coração do Time',
+            'Câncer-Leão': 'O Líder Empático',
+            'Câncer-Virgem': 'O Cuidador Meticuloso',
+            'Câncer-Libra': 'O Harmonizador',
+            'Câncer-Escorpião': 'O Intuitivo Profundo',
+            'Câncer-Sagitário': 'O Aventureiro do Coração',
+            'Câncer-Capricórnio': 'O Pilar do Time',
+            'Câncer-Aquário': 'O Visionário Empático',
+            'Câncer-Peixes': 'A Alma Acolhedora',
+            'Leão-Áries': 'O Showrunner',
+            'Leão-Touro': 'O Rei/Rainha da Estabilidade',
+            'Leão-Gêmeos': 'O Entertainer Nato',
+            'Leão-Câncer': 'O Líder Generoso',
+            'Leão-Leão': 'O Brilho Absoluto',
+            'Leão-Virgem': 'O Líder Detalhista',
+            'Leão-Libra': 'O Charme em Pessoa',
+            'Leão-Escorpião': 'A Presença Magnética',
+            'Leão-Sagitário': 'O Aventureiro Real',
+            'Leão-Capricórnio': 'O CEO Nato',
+            'Leão-Aquário': 'O Líder Inovador',
+            'Leão-Peixes': 'O Artista Inspirador',
+            'Virgem-Áries': 'O Otimizador Ágil',
+            'Virgem-Touro': 'O Mestre dos Processos',
+            'Virgem-Gêmeos': 'O Analista Comunicativo',
+            'Virgem-Câncer': 'O Helper Discreto',
+            'Virgem-Leão': 'O Organizador Brilhante',
+            'Virgem-Virgem': 'A Precisão Cirúrgica',
+            'Virgem-Libra': 'O Curador de Detalhes',
+            'Virgem-Escorpião': 'O Investigador Minucioso',
+            'Virgem-Sagitário': 'O Scholar Prático',
+            'Virgem-Capricórnio': 'O Arquiteto de Sistemas',
+            'Virgem-Aquário': 'O Hacker de Processos',
+            'Virgem-Peixes': 'O Artesão Sensível',
+            'Libra-Áries': 'O Negociador Assertivo',
+            'Libra-Touro': 'O Esteta Prático',
+            'Libra-Gêmeos': 'O Conector Diplomático',
+            'Libra-Câncer': 'O Colo do Time',
+            'Libra-Leão': 'O Embaixador do Charme',
+            'Libra-Virgem': 'O Equilibrista Analítico',
+            'Libra-Libra': 'A Harmonia em Pessoa',
+            'Libra-Escorpião': 'O Estrategista Social',
+            'Libra-Sagitário': 'O Filósofo Diplomata',
+            'Libra-Capricórnio': 'O Negociador de Ferro',
+            'Libra-Aquário': 'O Idealista Justo',
+            'Libra-Peixes': 'O Artista da Convivência',
+            'Escorpião-Áries': 'O Destemido Estratégico',
+            'Escorpião-Touro': 'A Força Silenciosa',
+            'Escorpião-Gêmeos': 'O Detetive Social',
+            'Escorpião-Câncer': 'O Guardião Intenso',
+            'Escorpião-Leão': 'O Poder Magnético',
+            'Escorpião-Virgem': 'O Analista Profundo',
+            'Escorpião-Libra': 'O Diplomata Afiado',
+            'Escorpião-Escorpião': 'A Intensidade Pura',
+            'Escorpião-Sagitário': 'O Filósofo Intenso',
+            'Escorpião-Capricórnio': 'O Estrategista Implacável',
+            'Escorpião-Aquário': 'O Revolucionário Profundo',
+            'Escorpião-Peixes': 'O Místico do Time',
+            'Sagitário-Áries': 'O Desbravador',
+            'Sagitário-Touro': 'O Aventureiro Estável',
+            'Sagitário-Gêmeos': 'O Eterno Estudante',
+            'Sagitário-Câncer': 'O Mentor Acolhedor',
+            'Sagitário-Leão': 'O Showman Filosófico',
+            'Sagitário-Virgem': 'O Professor Metódico',
+            'Sagitário-Libra': 'O Embaixador Global',
+            'Sagitário-Escorpião': 'O Buscador de Verdades',
+            'Sagitário-Sagitário': 'O Espírito Livre',
+            'Sagitário-Capricórnio': 'O Visionário com Plano',
+            'Sagitário-Aquário': 'O Futurista Otimista',
+            'Sagitário-Peixes': 'O Sonhador Filosófico',
+            'Capricórnio-Áries': 'O Executor Implacável',
+            'Capricórnio-Touro': 'A Muralha de Confiança',
+            'Capricórnio-Gêmeos': 'O Gestor Comunicativo',
+            'Capricórnio-Câncer': 'O Provedor do Time',
+            'Capricórnio-Leão': 'O Líder Respeitado',
+            'Capricórnio-Virgem': 'O Mestre da Excelência',
+            'Capricórnio-Libra': 'O Diplomata Sênior',
+            'Capricórnio-Escorpião': 'O Poder nos Bastidores',
+            'Capricórnio-Sagitário': 'O Estrategista de Longo Prazo',
+            'Capricórnio-Capricórnio': 'A Disciplina Absoluta',
+            'Capricórnio-Aquário': 'O Reformador Estruturado',
+            'Capricórnio-Peixes': 'O Sonhador com Agenda',
+            'Aquário-Áries': 'O Disruptor Ativista',
+            'Aquário-Touro': 'O Inovador Prático',
+            'Aquário-Gêmeos': 'O Gênio Comunicativo',
+            'Aquário-Câncer': 'O Humanitário do Time',
+            'Aquário-Leão': 'O Líder do Futuro',
+            'Aquário-Virgem': 'O Hacker Analítico',
+            'Aquário-Libra': 'O Idealista Social',
+            'Aquário-Escorpião': 'O Transformador Radical',
+            'Aquário-Sagitário': 'O Explorador do Impossível',
+            'Aquário-Capricórnio': 'O Arquiteto do Futuro',
+            'Aquário-Aquário': 'O Visionário Original',
+            'Aquário-Peixes': 'O Sonhador Cósmico',
+            'Peixes-Áries': 'O Guerreiro Sensível',
+            'Peixes-Touro': 'O Criativo Pé no Chão',
+            'Peixes-Gêmeos': 'O Contador de Histórias',
+            'Peixes-Câncer': 'A Empatia Infinita',
+            'Peixes-Leão': 'O Artista Dramático',
+            'Peixes-Virgem': 'O Curador Intuitivo',
+            'Peixes-Libra': 'O Pacificador',
+            'Peixes-Escorpião': 'O Místico Profundo',
+            'Peixes-Sagitário': 'O Viajante Espiritual',
+            'Peixes-Capricórnio': 'O Sonhador Realista',
+            'Peixes-Aquário': 'O Visionário Compassivo',
+            'Peixes-Peixes': 'A Intuição em Estado Puro'
+        };
+        
+        var key = solNome + '-' + ascNome;
+        return titulos[key] || 'Energia Única ✨';
+    }
+
+
+    // Elemento do Mês - baseado na temporada astrológica atual
+    function getElementoDoMes() {
+        var hoje = new Date();
+        var mes = hoje.getMonth() + 1;
+        var dia = hoje.getDate();
+        
+        // Determinar o signo atual (temporada)
+        var temporadas = [
+            { signo: 'Capricórnio', elem: 'Terra', inicio: [12,22], fim: [1,19], emoji: '♑' },
+            { signo: 'Aquário', elem: 'Ar', inicio: [1,20], fim: [2,18], emoji: '♒' },
+            { signo: 'Peixes', elem: 'Água', inicio: [2,19], fim: [3,20], emoji: '♓' },
+            { signo: 'Áries', elem: 'Fogo', inicio: [3,21], fim: [4,19], emoji: '♈' },
+            { signo: 'Touro', elem: 'Terra', inicio: [4,20], fim: [5,20], emoji: '♉' },
+            { signo: 'Gêmeos', elem: 'Ar', inicio: [5,21], fim: [6,20], emoji: '♊' },
+            { signo: 'Câncer', elem: 'Água', inicio: [6,21], fim: [7,22], emoji: '♋' },
+            { signo: 'Leão', elem: 'Fogo', inicio: [7,23], fim: [8,22], emoji: '♌' },
+            { signo: 'Virgem', elem: 'Terra', inicio: [8,23], fim: [9,22], emoji: '♍' },
+            { signo: 'Libra', elem: 'Ar', inicio: [9,23], fim: [10,22], emoji: '♎' },
+            { signo: 'Escorpião', elem: 'Água', inicio: [10,23], fim: [11,21], emoji: '♏' },
+            { signo: 'Sagitário', elem: 'Fogo', inicio: [11,22], fim: [12,21], emoji: '♐' }
+        ];
+        
+        var atual = temporadas[8]; // fallback Virgem
+        for (var i = 0; i < temporadas.length; i++) {
+            var t = temporadas[i];
+            var [mi, di] = t.inicio;
+            var [mf, df] = t.fim;
+            if (mi > mf) { // Capricórnio
+                if ((mes === mi && dia >= di) || (mes === mf && dia <= df)) { atual = t; break; }
+            } else {
+                if ((mes === mi && dia >= di) || (mes === mf && dia <= df)) { atual = t; break; }
+            }
+        }
+        
+        // Dicas por temporada
+        var dicas = {
+            'Áries': { titulo: 'Temporada de Iniciativa', dica: 'Momento ideal para lançar projetos novos, tomar decisões rápidas e sair da zona de conforto. O time rende mais com metas audaciosas e autonomia.', energia: 'Ação, coragem, velocidade' },
+            'Touro': { titulo: 'Temporada de Construção', dica: 'Momento para consolidar o que já começou, cuidar da qualidade e não apressar entregas. O time rende mais com estabilidade e reconhecimento.', energia: 'Estabilidade, qualidade, persistência' },
+            'Gêmeos': { titulo: 'Temporada de Comunicação', dica: 'Momento ideal para brainstormings, apresentações e alinhar expectativas. O time rende mais trocando ideias e quebrando silos.', energia: 'Comunicação, curiosidade, versatilidade' },
+            'Câncer': { titulo: 'Temporada de Cuidado', dica: 'Momento para fortalecer vínculos, fazer 1:1s significativos e cuidar do bem-estar. O time rende mais quando se sente seguro e valorizado.', energia: 'Empatia, proteção, intuição' },
+            'Leão': { titulo: 'Temporada de Brilho', dica: 'Momento para celebrar conquistas, dar visibilidade ao trabalho do time e se divertir. O time rende mais quando é reconhecido e pode mostrar seus talentos.', energia: 'Criatividade, liderança, celebração' },
+            'Virgem': { titulo: 'Temporada de Organização', dica: 'Momento ideal para revisar processos, limpar backlogs e otimizar fluxos. O time rende mais com clareza, checklists e atenção aos detalhes.', energia: 'Ordem, análise, melhoria contínua' },
+            'Libra': { titulo: 'Temporada de Harmonia', dica: 'Momento para equilibrar carga de trabalho, resolver pendências com parceiros e investir em relacionamentos. O time rende mais em colaboração.', energia: 'Equilíbrio, parcerias, diplomacia' },
+            'Escorpião': { titulo: 'Temporada de Profundidade', dica: 'Momento para mergulhar em problemas complexos, fazer deep dives e transformar o que não funciona. O time rende mais com foco intenso e coragem.', energia: 'Foco, transformação, estratégia' },
+            'Sagitário': { titulo: 'Temporada de Expansão', dica: 'Momento para pensar grande, explorar novas oportunidades e investir em aprendizado. O time rende mais com liberdade e visão de longo prazo.', energia: 'Otimismo, crescimento, exploração' },
+            'Capricórnio': { titulo: 'Temporada de Metas', dica: 'Momento para definir OKRs, planejar o próximo ciclo e ser disciplinado. O time rende mais com metas claras e responsabilidade compartilhada.', energia: 'Disciplina, ambição, planejamento' },
+            'Aquário': { titulo: 'Temporada de Inovação', dica: 'Momento para questionar o status quo, experimentar ferramentas novas e pensar diferente. O time rende mais com autonomia e espaço para inovar.', energia: 'Originalidade, colaboração, futuro' },
+            'Peixes': { titulo: 'Temporada de Intuição', dica: 'Momento para ouvir a intuição do time, criar com mais liberdade e cuidar da energia coletiva. O time rende mais quando o propósito está claro.', energia: 'Intuição, criatividade, compaixão' }
+        };
+        
+        var info = dicas[atual.signo] || dicas['Virgem'];
+        
+        return {
+            signo: atual.signo,
+            emoji: atual.emoji,
+            elemento: atual.elem,
+            titulo: info.titulo,
+            dica: info.dica,
+            energia: info.energia
+        };
+    }
+    
+    function renderElementoDoMes() {
+        var el = document.getElementById('elementoDoMes');
+        if (!el) return;
+        
+        var info = getElementoDoMes();
+        var elemEmojis = { 'Fogo': '🔥', 'Terra': '🌍', 'Ar': '💨', 'Água': '💧' };
+        
+        el.innerHTML = 
+            '<div class="mes-card">' +
+                '<div class="mes-header">' +
+                    '<div class="mes-emoji">' + info.emoji + '</div>' +
+                    '<div>' +
+                        '<div class="mes-titulo">' + info.titulo + '</div>' +
+                        '<div class="mes-subtitulo">Temporada de ' + info.signo + ' • ' + (elemEmojis[info.elemento] || '') + ' ' + info.elemento + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<p class="mes-dica">' + info.dica + '</p>' +
+                '<div class="mes-energia"><strong>Palavras-chave:</strong> ' + info.energia + '</div>' +
+            '</div>';
+    }
+
+
+    // Renderizar Mural do Time (agrupado por elemento)
+    function renderMural() {
+        var container = document.getElementById('muralContent');
+        if (!container) return;
+        
+        if (membrosTime.length < 1) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-palette"></i><h3>Adicione membros para ver o mural</h3></div>';
+            return;
+        }
+        
+        var elemEmojis = { 'Fogo': '🔥', 'Terra': '🌍', 'Ar': '💨', 'Água': '💧' };
+        var elemColors = { 'Fogo': '#ef4444', 'Terra': '#22c55e', 'Ar': '#60a5fa', 'Água': '#06b6d4' };
+        var elemBgs = { 'Fogo': 'rgba(239,68,68,0.08)', 'Terra': 'rgba(34,197,94,0.08)', 'Ar': 'rgba(96,165,250,0.08)', 'Água': 'rgba(6,182,212,0.08)' };
+        var elemDesc = { 'Fogo': 'Ação · Iniciativa · Coragem', 'Terra': 'Estabilidade · Foco · Resultados', 'Ar': 'Ideias · Comunicação · Conexão', 'Água': 'Empatia · Intuição · Profundidade' };
+        
+        // Agrupar por elemento
+        var grupos = { 'Fogo': [], 'Terra': [], 'Ar': [], 'Água': [] };
+        membrosTime.forEach(function(m) {
+            var elem = m.sol_elemento || 'Fogo';
+            if (!grupos[elem]) grupos[elem] = [];
+            grupos[elem].push(m);
+        });
+        
+        var html = '';
+        ['Fogo', 'Terra', 'Ar', 'Água'].forEach(function(elem) {
+            var membros = grupos[elem] || [];
+            if (membros.length === 0) return;
+            
+            var color = elemColors[elem];
+            var bg = elemBgs[elem];
+            
+            html += '<div class="mural-element-group" style="border-color:' + color + '; background:' + bg + ';">';
+            html += '<div class="mural-element-header">';
+            html += '<span class="mural-element-icon">' + elemEmojis[elem] + '</span>';
+            html += '<span class="mural-element-name" style="color:' + color + ';">' + elem + '</span>';
+            html += '<span class="mural-element-desc">' + elemDesc[elem] + '</span>';
+            html += '</div>';
+            html += '<div class="mural-members">';
+            
+            membros.forEach(function(m) {
+                var titulo = gerarTituloAstral(m.sol_nome || '', m.asc_nome || '');
+                html += '<div class="mural-member">';
+                html += '<div class="mural-member-emoji">' + (m.sol_emoji || '⭐') + '</div>';
+                html += '<div class="mural-member-name">' + (m.nome || '?') + '</div>';
+                html += '<div class="mural-member-title">' + titulo + '</div>';
+                html += '<div class="mural-member-signs">' + (m.sol_nome || '') + ' · ⬆️' + (m.asc_nome || '') + '</div>';
+                html += '</div>';
+            });
+            
+            html += '</div></div>';
+        });
+        
+        container.innerHTML = html;
+    }
+
     // Máscara de data dd/mm/aaaa
     document.getElementById('dataNasc').addEventListener('input', function(e) {
         let v = e.target.value.replace(/\D/g, '');
@@ -2197,7 +2567,19 @@
     carregarMembros();
     atualizarStatus(usandoSheets);    </script>
 
-    <footer style="text-align:center; padding:24px; color:var(--text-secondary); font-size:0.75rem; opacity:0.7; margin-top:40px;">
+    
+        <div class="tab-content" id="mural-tab">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-palette"></i> Mural do Time</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                    Visão artística do time agrupado por elemento.
+                </p>
+            </div>
+            <div id="muralContent" class="mural-grid"></div>
+        </div>
+    </div>
+
+<footer style="text-align:center; padding:24px; color:var(--text-secondary); font-size:0.75rem; opacity:0.7; margin-top:40px;">
         Created by @paannalu
     </footer>
 </body>
