@@ -606,6 +606,30 @@
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent-purple-light); }
+    
+        .mode-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
+        .mode-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-body);
+        }
+        .mode-btn.active {
+            background: var(--gradient-purple);
+            color: white;
+            border-color: var(--accent-purple);
+            box-shadow: var(--shadow-purple);
+        }
+        .mode-btn:hover:not(.active) {
+            border-color: var(--accent-purple-light);
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -638,24 +662,34 @@
         <!-- Tab: Form -->
         <div class="tab-content active" id="form-tab">
             <div class="card">
-                <h2 class="card-title"><i class="fas fa-sun"></i> Seus Dados de Nascimento</h2>
+                <h2 class="card-title"><i class="fas fa-sun"></i> Cadastrar Mapa Astral</h2>
+                <!-- Toggle modo -->
+                <div class="mode-toggle" style="display:flex;gap:8px;margin-bottom:20px;">
+                    <button type="button" class="mode-btn active" id="modeCalc" onclick="setMode('calc')">
+                        <i class="fas fa-calculator"></i> Calcular automaticamente
+                    </button>
+                    <button type="button" class="mode-btn" id="modeManual" onclick="setMode('manual')">
+                        <i class="fas fa-edit"></i> Inserir manualmente
+                    </button>
+                </div>
                 <form id="astralForm">
                     <div class="form-grid">
-                        <div class="form-group">
+                        <div class="form-group" style="grid-column: 1 / -1;">
                             <label for="nome"><i class="fas fa-user"></i> Alias</label>
                             <input type="text" id="nome" placeholder="Seu alias/apelido" required>
                         </div>
-                        <div class="form-group">
+                        <!-- Campos automáticos -->
+                        <div class="form-group calc-fields">
                             <label for="dataNasc"><i class="fas fa-calendar"></i> Data de Nascimento (dd/mm/aaaa)</label>
-                            <input type="text" id="dataNasc" placeholder="dd/mm/aaaa" maxlength="10" required>
+                            <input type="text" id="dataNasc" placeholder="dd/mm/aaaa" maxlength="10">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group calc-fields">
                             <label for="horaNasc"><i class="fas fa-clock"></i> Horário de Nascimento</label>
                             <input type="time" id="horaNasc" value="12:00">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group calc-fields">
                             <label for="cidade"><i class="fas fa-map-marker-alt"></i> Cidade de Nascimento</label>
-                            <select id="cidade" required>
+                            <select id="cidade">
                                 <option value="">Selecione a cidade...</option>
                                 <optgroup label="🇧🇷 Brasil">
                                     <option value="-23.55|-46.63|-3|São Paulo, SP">São Paulo, SP</option>
@@ -696,9 +730,24 @@
                                 </optgroup>
                             </select>
                         </div>
+                        <!-- Campos manuais (ocultos por padrão) -->
+                        <div class="form-group manual-fields" style="display:none;">
+                            <label for="solManual"><i class="fas fa-sun"></i> Signo Solar</label>
+                            <select id="solManual">
+                                <option value="">Selecione...</option>
+                                <option value="Áries">Áries</option><option value="Touro">Touro</option><option value="Gêmeos">Gêmeos</option><option value="Câncer">Câncer</option><option value="Leão">Leão</option><option value="Virgem">Virgem</option><option value="Libra">Libra</option><option value="Escorpião">Escorpião</option><option value="Sagitário">Sagitário</option><option value="Capricórnio">Capricórnio</option><option value="Aquário">Aquário</option><option value="Peixes">Peixes</option>
+                            </select>
+                        </div>
+                        <div class="form-group manual-fields" style="display:none;">
+                            <label for="ascManual"><i class="fas fa-arrow-up"></i> Ascendente</label>
+                            <select id="ascManual">
+                                <option value="">Selecione...</option>
+                                <option value="Áries">Áries</option><option value="Touro">Touro</option><option value="Gêmeos">Gêmeos</option><option value="Câncer">Câncer</option><option value="Leão">Leão</option><option value="Virgem">Virgem</option><option value="Libra">Libra</option><option value="Escorpião">Escorpião</option><option value="Sagitário">Sagitário</option><option value="Capricórnio">Capricórnio</option><option value="Aquário">Aquário</option><option value="Peixes">Peixes</option>
+                            </select>
+                        </div>
                     </div>
                     <button type="submit" class="btn-primary" id="btnSubmit">
-                        <i class="fas fa-stars"></i> Gerar Mapa Astral
+                        <i class="fas fa-stars"></i> Cadastrar Mapa Astral
                     </button>
                 </form>
             </div>
@@ -1241,32 +1290,59 @@
         e.preventDefault();
         
         const nome = document.getElementById('nome').value.trim();
-        const dataNascRaw = document.getElementById('dataNasc').value;
-        // Converter dd/mm/aaaa → yyyy-mm-dd para cálculos internos
-        const dataParts = dataNascRaw.split('/');
-        if (dataParts.length !== 3 || dataParts[2].length !== 4) {
-            showToast('❌ Data inválida! Use o formato dd/mm/aaaa', 'error');
-            return;
-        }
-        const dataNasc = dataParts[2] + '-' + dataParts[1] + '-' + dataParts[0];
-        const horaNasc = document.getElementById('horaNasc').value || '12:00';
-        const cidadeVal = document.getElementById('cidade').value;
-        
-        if (!nome || !dataNasc || !cidadeVal) {
-            showToast('❌ Preencha todos os campos obrigatórios', 'error');
+        if (!nome) {
+            showToast('❌ Preencha o alias', 'error');
             return;
         }
         
-        const cidadeParts = cidadeVal.split('|');
-        const lat = parseFloat(cidadeParts[0]);
-        const lon = parseFloat(cidadeParts[1]);
-        const tz = parseFloat(cidadeParts[2]);
-        const cidadeNome = cidadeParts[3];
+        let sol, asc, resumo, dataNasc, horaNasc, cidadeNome, lat, lon, tz;
         
-        // Calcular
-        const sol = calcularSignoSolar(dataNasc);
-        const asc = calcularAscendente(dataNasc, horaNasc, lat, lon, tz);
-        const resumo = gerarResumo(sol, asc);
+        if (currentMode === 'calc') {
+            // MODO AUTOMÁTICO
+            const dataNascRaw = document.getElementById('dataNasc').value;
+            const dataParts = dataNascRaw.split('/');
+            if (dataParts.length !== 3 || dataParts[2].length !== 4) {
+                showToast('❌ Data inválida! Use o formato dd/mm/aaaa', 'error');
+                return;
+            }
+            dataNasc = dataParts[2] + '-' + dataParts[1] + '-' + dataParts[0];
+            horaNasc = document.getElementById('horaNasc').value || '12:00';
+            const cidadeVal = document.getElementById('cidade').value;
+            
+            if (!dataNasc || !cidadeVal) {
+                showToast('❌ Preencha todos os campos obrigatórios', 'error');
+                return;
+            }
+            
+            const cidadeParts = cidadeVal.split('|');
+            lat = parseFloat(cidadeParts[0]);
+            lon = parseFloat(cidadeParts[1]);
+            tz = parseFloat(cidadeParts[2]);
+            cidadeNome = cidadeParts[3];
+            
+            sol = calcularSignoSolar(dataNasc);
+            asc = calcularAscendente(dataNasc, horaNasc, lat, lon, tz);
+            resumo = gerarResumo(sol, asc);
+        } else {
+            // MODO MANUAL
+            const solNome = document.getElementById('solManual').value;
+            const ascNome = document.getElementById('ascManual').value;
+            
+            if (!solNome || !ascNome) {
+                showToast('❌ Selecione o signo solar e ascendente', 'error');
+                return;
+            }
+            
+            sol = SIGNOS.find(s => s.nome === solNome);
+            asc = SIGNOS.find(s => s.nome === ascNome);
+            resumo = gerarResumo(sol, asc);
+            dataNasc = '';
+            horaNasc = '';
+            cidadeNome = '';
+            lat = 0;
+            lon = 0;
+            tz = 0;
+        }
         
         // Exibir resultado
         exibirResultado(sol, asc, resumo);
@@ -1298,6 +1374,42 @@
 
     // ============== INIT ==============
 
+
+
+    // Mode toggle: calc vs manual
+    let currentMode = 'calc';
+    
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('modeCalc').classList.toggle('active', mode === 'calc');
+        document.getElementById('modeManual').classList.toggle('active', mode === 'manual');
+        
+        // Show/hide appropriate fields
+        document.querySelectorAll('.calc-fields').forEach(el => {
+            el.style.display = mode === 'calc' ? '' : 'none';
+        });
+        document.querySelectorAll('.manual-fields').forEach(el => {
+            el.style.display = mode === 'manual' ? '' : 'none';
+        });
+        
+        // Update required attributes
+        const dataNasc = document.getElementById('dataNasc');
+        const cidade = document.getElementById('cidade');
+        const solManual = document.getElementById('solManual');
+        const ascManual = document.getElementById('ascManual');
+        
+        if (mode === 'calc') {
+            dataNasc.setAttribute('required', '');
+            cidade.setAttribute('required', '');
+            solManual.removeAttribute('required');
+            ascManual.removeAttribute('required');
+        } else {
+            dataNasc.removeAttribute('required');
+            cidade.removeAttribute('required');
+            solManual.setAttribute('required', '');
+            ascManual.setAttribute('required', '');
+        }
+    }
 
     // Máscara de data dd/mm/aaaa
     document.getElementById('dataNasc').addEventListener('input', function(e) {
