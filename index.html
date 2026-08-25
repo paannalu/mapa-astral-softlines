@@ -1923,17 +1923,42 @@
         var mod1 = signoModalidade[sol1] || '';
         var mod2 = signoModalidade[sol2] || '';
         
-        // Gerar pontos em comum
+        // Gerar pontos em comum (baseado em signos + aspectos)
         var pontosComum = [];
-        if (elem1 === elem2) pontosComum.push('Mesmo elemento (' + elem1 + ') — ritmo de trabalho parecido');
+        
+        // Calcular aspecto entre os sóis
+        var signosLista = ['Áries','Touro','Gêmeos','Câncer','Leão','Virgem','Libra','Escorpião','Sagitário','Capricórnio','Aquário','Peixes'];
+        var idx1 = signosLista.indexOf(sol1);
+        var idx2 = signosLista.indexOf(sol2);
+        var distancia = Math.min(Math.abs(idx1 - idx2), 12 - Math.abs(idx1 - idx2));
+        
+        var aspectoNomes = {0:'Conjunção', 1:'Semi-sextil', 2:'Sextil', 3:'Quadratura', 4:'Trígono', 5:'Quincúncio', 6:'Oposição'};
+        var aspectoDescs = {
+            0: 'Mesmo signo! Entendem perfeitamente as motivações e frustrações um do outro.',
+            1: 'Signos vizinhos — estilos bem diferentes, mas podem aprender muito um com o outro.',
+            2: 'Sextil — energia complementar que flui naturalmente. Colaboração fácil e produtiva.',
+            3: 'Quadratura — dinâmica desafiadora que gera crescimento. As diferenças impulsionam ambos a melhorar.',
+            4: 'Trígono — harmonia natural! Mesma sintonia, se entendem quase sem explicar.',
+            5: 'Quincúncio — perspectivas inesperadas. Um sempre surpreende o outro com ângulos novos.',
+            6: 'Oposição — polos complementares. O que um tem de sobra é o que o outro precisa.'
+        };
+        
+        pontosComum.push(aspectoNomes[distancia] + ' (' + sol1 + ' ↔ ' + sol2 + '): ' + aspectoDescs[distancia]);
+        
+        // Elementos em comum
+        if (elem1 === elem2) pontosComum.push('Mesmo elemento (' + elem1 + ') — ritmo de trabalho e valores parecidos');
+        
+        // Modalidade em comum
         if (mod1 === mod2 && mod1) {
-            var modDesc = { 'Cardinal': 'Ambos são iniciadores — gostam de tomar a frente', 'Fixo': 'Ambos são persistentes — levam projetos até o fim', 'Mutável': 'Ambos são adaptáveis — lidam bem com mudanças' };
-            pontosComum.push(modDesc[mod1] || 'Mesma modalidade');
+            var modDesc = { 'Cardinal': 'Ambos são do tipo iniciador — gostam de tomar a frente e decidir', 'Fixo': 'Ambos são do tipo persistente — levam projetos até o fim com consistência', 'Mutável': 'Ambos são do tipo adaptável — flexíveis e abertos a mudanças' };
+            pontosComum.push(modDesc[mod1]);
         }
-        if (asc1 === elem2 || asc2 === elem1) pontosComum.push('O ascendente de um complementa o sol do outro — conexão natural no dia a dia');
-        if (elem1 === 'Fogo' && elem2 === 'Ar' || elem1 === 'Ar' && elem2 === 'Fogo') pontosComum.push('Fogo + Ar = ideias que viram ação rápida');
-        if (elem1 === 'Terra' && elem2 === 'Água' || elem1 === 'Água' && elem2 === 'Terra') pontosComum.push('Terra + Água = equilíbrio entre razão e intuição');
-        if (pontosComum.length === 0) pontosComum.push('Perspectivas diferentes — trazem visões complementares ao time');
+        
+        // Complementos entre Sol e Ascendente
+        var ascNome1 = m1.asc_nome || '';
+        var ascNome2 = m2.asc_nome || '';
+        if (ascNome1 === sol2) pontosComum.push(m1.nome + ' tem ascendente em ' + ascNome1 + ' (mesmo signo solar de ' + m2.nome + ') — conexão de primeira impressão');
+        if (ascNome2 === sol1) pontosComum.push(m2.nome + ' tem ascendente em ' + ascNome2 + ' (mesmo signo solar de ' + m1.nome + ') — reconhecimento imediato');
         
         // Gerar dicas de convivência baseadas nos elementos
         var dicas = gerarDicasConvivencia(elem1, elem2, sol1, sol2, mod1, mod2);
@@ -1984,77 +2009,80 @@
     }
     
     // Gerar dicas de convivência estilo Aperian
-    function gerarDicasConvivencia(elem1, elem2, sol1, sol2, mod1, mod2) {
+        function gerarDicasConvivencia(elem1, elem2, sol1, sol2, mod1, mod2) {
         var dicas = [];
         
-        // Dicas baseadas na combinação de elementos
-        var elemDicas = {
-            'Fogo-Fogo': [
-                'Cuidado com disputas por protagonismo — dividam os holofotes',
-                'Usem a energia mútua para sprints intensos, mas combinem pausas',
-                'Sejam diretos um com o outro — os dois preferem franqueza'
+        // Dicas baseadas no ASPECTO entre os signos (relação específica)
+        var signosLista = ['Áries','Touro','Gêmeos','Câncer','Leão','Virgem','Libra','Escorpião','Sagitário','Capricórnio','Aquário','Peixes'];
+        var idx1 = signosLista.indexOf(sol1);
+        var idx2 = signosLista.indexOf(sol2);
+        var distancia = Math.min(Math.abs(idx1 - idx2), 12 - Math.abs(idx1 - idx2));
+        
+        var aspectoDicas = {
+            0: [ // Mesmo signo
+                'Cuidado com o efeito espelho — vocês podem amplificar tanto qualidades quanto defeitos',
+                'Usem a sintonia natural para projetos que exigem visão unificada',
+                'Revezem a liderança — ambos tendem a agir da mesma forma'
             ],
-            'Fogo-Terra': [
-                'Fogo traz as ideias, Terra estrutura a execução — respeitem esse ritmo',
-                sol1 + ' pode parecer impaciente; ' + sol2 + ' pode parecer lento(a). Combinem prazos realistas',
-                'Valorizem o que o outro traz: um inspira, o outro materializa'
+            1: [ // Semi-sextil (vizinhos)
+                'Paciência é chave — o estilo de um pode parecer estranho pro outro',
+                'Definam papéis claros para evitar ruído na comunicação',
+                'Busquem aprender com o que o outro faz diferente de você'
             ],
-            'Fogo-Ar': [
-                'Dupla de brainstorming natural — mas lembrem de documentar as decisões',
-                'Ambos são rápidos: usem isso para prototipar, mas peçam feedback antes de escalar',
-                'Comunicação fluida — aproveitem para co-criar apresentações e pitches'
+            2: [ // Sextil (complementares)
+                'Aproveitem a fluência natural — boas ideias surgem entre vocês sem esforço',
+                'Colaborem em brainstormings e criação conjunta — a energia flui',
+                'Dividam projetos que exigem perspectivas complementares'
             ],
-            'Fogo-Água': [
-                'Fogo é direto, Água é sensível — cuidem do tom nas mensagens escritas',
-                'Quando discordarem, Fogo deve ouvir mais; Água deve ser mais explícito(a)',
-                'Combinem check-ins informais — isso fortalece a confiança da dupla'
+            3: [ // Quadratura (tensão)
+                'A tensão entre vocês é produtiva quando canalizada — usem para debates saudáveis',
+                'Evitem tomar silêncio como concordância — verbalizem expectativas',
+                'Coloquem prazos e entregas claras — ambos querem resultados, mas por caminhos diferentes'
             ],
-            'Terra-Terra': [
-                'Planejamento é o forte de vocês — mas reservem espaço para experimentar',
-                'Cuidado com perfeccionismo mútuo — "bom" às vezes é melhor que "perfeito"',
-                'Dividam tarefas concretas e celebrem entregas juntos'
+            4: [ // Trígono (harmonia)
+                'A sintonia é natural — usem isso em projetos que exigem confiança mútua',
+                'Cuidado para não ficarem na zona de conforto juntos — se desafiem',
+                'Dupla ideal para mentorias informais e troca de experiências'
             ],
-            'Terra-Ar': [
-                'Ar traz criatividade, Terra dá forma — colaborem em fases (idear → executar)',
-                'Terra pode achar Ar disperso; Ar pode achar Terra rígido — aceitem o ritmo do outro',
-                'Documentem ideias juntos: post-its para Ar, planilha para Terra'
+            5: [ // Quincúncio (ajuste)
+                'Não tentem mudar o outro — aceitem que são naturalmente diferentes',
+                'Busquem o ponto em comum nos objetivos (não no método)',
+                'Combinações criativas surgem justamente da diferença de perspectiva'
             ],
-            'Terra-Água': [
-                'Dupla naturalmente harmônica — confiança se constrói rápido',
-                'Terra pode ser prático demais; Água pode levar pro pessoal — equilibrem com empatia + objetividade',
-                'Trabalham bem em projetos longos com propósito claro'
-            ],
-            'Ar-Ar': [
-                'Muitas ideias! Definam um responsável por priorizar e decidir',
-                'Evitem loops de conversa sem conclusão — usem timebox nas discussões',
-                'A comunicação é o forte: aproveitem para mediar conflitos no time'
-            ],
-            'Ar-Água': [
-                'Ar é racional, Água é emocional — combinem os dois inputs nas decisões',
-                'Ar deve prestar atenção no não-dito; Água deve verbalizar expectativas',
-                'Juntos, criam soluções criativas E empáticas'
-            ],
-            'Água-Água': [
-                'Muita empatia mútua — cuidado para não evitarem conflitos necessários',
-                'Sejam explícitos com expectativas — intuição é boa, mas clareza é melhor',
-                'O ambiente de trabalho entre vocês tende a ser acolhedor — compartilhem isso com o time'
+            6: [ // Oposição (polaridade)
+                'Vocês se equilibram — o que um tem de forte, o outro complementa',
+                'Em momentos de decisão, ouçam o outro antes de agir — a perspectiva oposta enriquece',
+                'Dupla poderosa quando respeitam que o outro vê o mesmo cenário de um ângulo inverso'
             ]
         };
         
-        var key = elem1 + '-' + elem2;
-        var keyRev = elem2 + '-' + elem1;
-        dicas = elemDicas[key] || elemDicas[keyRev] || [
-            'Respeitem o ritmo de cada um',
-            'Comuniquem expectativas com clareza',
-            'Busquem projetos onde os pontos fortes se complementam'
-        ];
+        dicas = aspectoDicas[distancia] || ['Respeitem o ritmo de cada um'];
         
-        // Adicionar dica de modalidade se forem diferentes
+        // Adicionar dicas baseadas nos ELEMENTOS (prático, como agir)
+        var elemDicasExtras = {
+            'Fogo-Fogo': 'Definam turnos para liderar — dois fogos competindo geram atrito desnecessário.',
+            'Fogo-Terra': 'Combinem prazos: Fogo propõe a visão, Terra define o cronograma realista.',
+            'Fogo-Ar': 'Documentem as ideias! Vocês geram muitas, mas podem se perder na execução.',
+            'Fogo-Água': 'Fogo: modere a intensidade nas críticas. Água: seja mais direto nos feedbacks.',
+            'Terra-Terra': 'Reservem tempo para inovar — a zona de conforto pode virar estagnação.',
+            'Terra-Ar': 'Ar propõe, Terra valida. Usem esse ciclo a favor do time.',
+            'Terra-Água': 'Forte aliança natural. Usem para projetos sensíveis que precisam de cuidado.',
+            'Ar-Ar': 'Elejam quem decide — duas cabeças "no ar" precisam de um ancorador.',
+            'Ar-Água': 'Ar: preste atenção no emocional. Água: verbalize o que precisa.',
+            'Água-Água': 'Combinem check-ins objetivos — empatia é ótima, mas clareza também.'
+        };
+        
+        var elemKey = elem1 + '-' + elem2;
+        var elemKeyRev = elem2 + '-' + elem1;
+        var extraDica = elemDicasExtras[elemKey] || elemDicasExtras[elemKeyRev];
+        if (extraDica) dicas.push(extraDica);
+        
+        // Dica de modalidade
         if (mod1 && mod2 && mod1 !== mod2) {
             var modDicas = {
-                'Cardinal-Fixo': 'Um gosta de iniciar, o outro de manter — dividam: um começa, o outro sustenta',
-                'Cardinal-Mutável': 'Um lidera a direção, o outro adapta o caminho — complementares em projetos ágeis',
-                'Fixo-Mutável': 'Um é firme, o outro é flexível — juntos equilibram consistência e adaptação'
+                'Cardinal-Fixo': 'Um gosta de iniciar, o outro de manter — dividam: um começa o projeto, o outro sustenta.',
+                'Cardinal-Mutável': 'Um lidera a direção, o outro adapta o percurso — ótimos em projetos ágeis.',
+                'Fixo-Mutável': 'Um traz consistência, o outro flexibilidade — equilibrem rigidez e adaptação.'
             };
             var modKey = mod1 + '-' + mod2;
             var modKeyRev = mod2 + '-' + mod1;
@@ -2063,8 +2091,7 @@
         }
         
         return dicas;
-    }
-    
+    }    
     // Gerar superpoder da dupla
     function gerarSuperpoder(elem1, elem2) {
         var poderes = {
