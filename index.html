@@ -785,6 +785,53 @@
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
+
+        .compat-insights {
+            text-align: left;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .insight-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+        }
+        .insight-section h4 {
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+        }
+        .insight-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .insight-section li {
+            font-size: 0.83rem;
+            color: var(--text-secondary);
+            padding: 6px 0;
+            padding-left: 16px;
+            position: relative;
+            line-height: 1.5;
+        }
+        .insight-section li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-purple-light);
+        }
+        .insight-superpower {
+            background: linear-gradient(135deg, rgba(127,90,240,0.1), rgba(226,183,20,0.1));
+            border: 1px solid rgba(127,90,240,0.3);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -1739,7 +1786,7 @@
         sel2.value = val2;
     }
     
-    // Comparar duas pessoas
+    // Comparar duas pessoas - com dicas estilo Aperian
     function compararDupla() {
         const nome1 = document.getElementById('comparar1').value;
         const nome2 = document.getElementById('comparar2').value;
@@ -1763,26 +1810,183 @@
         const labels = ['', 'Bem diferente', 'Algumas diferenças', 'Neutro', 'Boa sintonia', 'Dupla imbatível!'];
         const emojis = ['', '⚡', '🌊', '🤝', '🤗', '🫂'];
         
-        resultado.innerHTML = 
-            '<div class="compat-result">' +
-                '<div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:16px;">' +
-                    '<div style="text-align:center;">' +
-                        '<div style="font-size:2rem;">' + (m1.sol_emoji || '⭐') + '</div>' +
-                        '<div style="font-size:0.85rem;font-weight:600;">' + m1.nome + '</div>' +
-                        '<div style="font-size:0.75rem;color:var(--text-secondary);">' + (m1.sol_nome || '') + ' • ⬆️' + (m1.asc_nome || '') + '</div>' +
-                    '</div>' +
-                    '<div class="compat-score-big">' + score + '/5</div>' +
-                    '<div style="text-align:center;">' +
-                        '<div style="font-size:2rem;">' + (m2.sol_emoji || '⭐') + '</div>' +
-                        '<div style="font-size:0.85rem;font-weight:600;">' + m2.nome + '</div>' +
-                        '<div style="font-size:0.75rem;color:var(--text-secondary);">' + (m2.sol_nome || '') + ' • ⬆️' + (m2.asc_nome || '') + '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="compat-stars">' + starsHtml + '</div>' +
-                '<div class="compat-label">' + emojis[score] + ' ' + labels[score] + '</div>' +
-            '</div>';
+        // Elementos e modalidades
+        var elem1 = m1.sol_elemento || 'Fogo';
+        var elem2 = m2.sol_elemento || 'Fogo';
+        var asc1 = m1.asc_elemento || elem1;
+        var asc2 = m2.asc_elemento || elem2;
+        var sol1 = m1.sol_nome || '';
+        var sol2 = m2.sol_nome || '';
+        
+        var signoModalidade = {
+            'Áries': 'Cardinal', 'Câncer': 'Cardinal', 'Libra': 'Cardinal', 'Capricórnio': 'Cardinal',
+            'Touro': 'Fixo', 'Leão': 'Fixo', 'Escorpião': 'Fixo', 'Aquário': 'Fixo',
+            'Gêmeos': 'Mutável', 'Virgem': 'Mutável', 'Sagitário': 'Mutável', 'Peixes': 'Mutável'
+        };
+        
+        var mod1 = signoModalidade[sol1] || '';
+        var mod2 = signoModalidade[sol2] || '';
+        
+        // Gerar pontos em comum
+        var pontosComum = [];
+        if (elem1 === elem2) pontosComum.push('Mesmo elemento (' + elem1 + ') — ritmo de trabalho parecido');
+        if (mod1 === mod2 && mod1) {
+            var modDesc = { 'Cardinal': 'Ambos são iniciadores — gostam de tomar a frente', 'Fixo': 'Ambos são persistentes — levam projetos até o fim', 'Mutável': 'Ambos são adaptáveis — lidam bem com mudanças' };
+            pontosComum.push(modDesc[mod1] || 'Mesma modalidade');
+        }
+        if (asc1 === elem2 || asc2 === elem1) pontosComum.push('O ascendente de um complementa o sol do outro — conexão natural no dia a dia');
+        if (elem1 === 'Fogo' && elem2 === 'Ar' || elem1 === 'Ar' && elem2 === 'Fogo') pontosComum.push('Fogo + Ar = ideias que viram ação rápida');
+        if (elem1 === 'Terra' && elem2 === 'Água' || elem1 === 'Água' && elem2 === 'Terra') pontosComum.push('Terra + Água = equilíbrio entre razão e intuição');
+        if (pontosComum.length === 0) pontosComum.push('Perspectivas diferentes — trazem visões complementares ao time');
+        
+        // Gerar dicas de convivência baseadas nos elementos
+        var dicas = gerarDicasConvivencia(elem1, elem2, sol1, sol2, mod1, mod2);
+        
+        // Montar HTML
+        var html = '<div class="compat-result">';
+        
+        // Header com nomes e score
+        html += '<div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:16px;">' +
+            '<div style="text-align:center;">' +
+                '<div style="font-size:2rem;">' + (m1.sol_emoji || '⭐') + '</div>' +
+                '<div style="font-size:0.85rem;font-weight:600;">' + m1.nome + '</div>' +
+                '<div style="font-size:0.75rem;color:var(--text-secondary);">' + (m1.sol_nome || '') + ' • ⬆️' + (m1.asc_nome || '') + '</div>' +
+            '</div>' +
+            '<div class="compat-score-big">' + score + '/5</div>' +
+            '<div style="text-align:center;">' +
+                '<div style="font-size:2rem;">' + (m2.sol_emoji || '⭐') + '</div>' +
+                '<div style="font-size:0.85rem;font-weight:600;">' + m2.nome + '</div>' +
+                '<div style="font-size:0.75rem;color:var(--text-secondary);">' + (m2.sol_nome || '') + ' • ⬆️' + (m2.asc_nome || '') + '</div>' +
+            '</div>' +
+        '</div>';
+        
+        html += '<div class="compat-stars">' + starsHtml + '</div>';
+        html += '<div class="compat-label">' + emojis[score] + ' ' + labels[score] + '</div>';
+        
+        // Pontos em comum
+        html += '<div class="compat-insights">';
+        html += '<div class="insight-section">';
+        html += '<h4>🤝 Pontos em comum</h4>';
+        html += '<ul>' + pontosComum.map(function(p) { return '<li>' + p + '</li>'; }).join('') + '</ul>';
+        html += '</div>';
+        
+        // Dicas de convivência
+        html += '<div class="insight-section">';
+        html += '<h4>💡 Dicas para trabalhar melhor juntos</h4>';
+        html += '<ul>' + dicas.map(function(d) { return '<li>' + d + '</li>'; }).join('') + '</ul>';
+        html += '</div>';
+        
+        // Superpoder da dupla
+        var superpoder = gerarSuperpoder(elem1, elem2);
+        html += '<div class="insight-superpower">';
+        html += '<strong>⚡ Superpoder da dupla:</strong> ' + superpoder;
+        html += '</div>';
+        
+        html += '</div></div>';
+        
+        resultado.innerHTML = html;
     }
     
+    // Gerar dicas de convivência estilo Aperian
+    function gerarDicasConvivencia(elem1, elem2, sol1, sol2, mod1, mod2) {
+        var dicas = [];
+        
+        // Dicas baseadas na combinação de elementos
+        var elemDicas = {
+            'Fogo-Fogo': [
+                'Cuidado com disputas por protagonismo — dividam os holofotes',
+                'Usem a energia mútua para sprints intensos, mas combinem pausas',
+                'Sejam diretos um com o outro — os dois preferem franqueza'
+            ],
+            'Fogo-Terra': [
+                'Fogo traz as ideias, Terra estrutura a execução — respeitem esse ritmo',
+                sol1 + ' pode parecer impaciente; ' + sol2 + ' pode parecer lento(a). Combinem prazos realistas',
+                'Valorizem o que o outro traz: um inspira, o outro materializa'
+            ],
+            'Fogo-Ar': [
+                'Dupla de brainstorming natural — mas lembrem de documentar as decisões',
+                'Ambos são rápidos: usem isso para prototipar, mas peçam feedback antes de escalar',
+                'Comunicação fluida — aproveitem para co-criar apresentações e pitches'
+            ],
+            'Fogo-Água': [
+                'Fogo é direto, Água é sensível — cuidem do tom nas mensagens escritas',
+                'Quando discordarem, Fogo deve ouvir mais; Água deve ser mais explícito(a)',
+                'Combinem check-ins informais — isso fortalece a confiança da dupla'
+            ],
+            'Terra-Terra': [
+                'Planejamento é o forte de vocês — mas reservem espaço para experimentar',
+                'Cuidado com perfeccionismo mútuo — "bom" às vezes é melhor que "perfeito"',
+                'Dividam tarefas concretas e celebrem entregas juntos'
+            ],
+            'Terra-Ar': [
+                'Ar traz criatividade, Terra dá forma — colaborem em fases (idear → executar)',
+                'Terra pode achar Ar disperso; Ar pode achar Terra rígido — aceitem o ritmo do outro',
+                'Documentem ideias juntos: post-its para Ar, planilha para Terra'
+            ],
+            'Terra-Água': [
+                'Dupla naturalmente harmônica — confiança se constrói rápido',
+                'Terra pode ser prático demais; Água pode levar pro pessoal — equilibrem com empatia + objetividade',
+                'Trabalham bem em projetos longos com propósito claro'
+            ],
+            'Ar-Ar': [
+                'Muitas ideias! Definam um responsável por priorizar e decidir',
+                'Evitem loops de conversa sem conclusão — usem timebox nas discussões',
+                'A comunicação é o forte: aproveitem para mediar conflitos no time'
+            ],
+            'Ar-Água': [
+                'Ar é racional, Água é emocional — combinem os dois inputs nas decisões',
+                'Ar deve prestar atenção no não-dito; Água deve verbalizar expectativas',
+                'Juntos, criam soluções criativas E empáticas'
+            ],
+            'Água-Água': [
+                'Muita empatia mútua — cuidado para não evitarem conflitos necessários',
+                'Sejam explícitos com expectativas — intuição é boa, mas clareza é melhor',
+                'O ambiente de trabalho entre vocês tende a ser acolhedor — compartilhem isso com o time'
+            ]
+        };
+        
+        var key = elem1 + '-' + elem2;
+        var keyRev = elem2 + '-' + elem1;
+        dicas = elemDicas[key] || elemDicas[keyRev] || [
+            'Respeitem o ritmo de cada um',
+            'Comuniquem expectativas com clareza',
+            'Busquem projetos onde os pontos fortes se complementam'
+        ];
+        
+        // Adicionar dica de modalidade se forem diferentes
+        if (mod1 && mod2 && mod1 !== mod2) {
+            var modDicas = {
+                'Cardinal-Fixo': 'Um gosta de iniciar, o outro de manter — dividam: um começa, o outro sustenta',
+                'Cardinal-Mutável': 'Um lidera a direção, o outro adapta o caminho — complementares em projetos ágeis',
+                'Fixo-Mutável': 'Um é firme, o outro é flexível — juntos equilibram consistência e adaptação'
+            };
+            var modKey = mod1 + '-' + mod2;
+            var modKeyRev = mod2 + '-' + mod1;
+            var modDica = modDicas[modKey] || modDicas[modKeyRev];
+            if (modDica) dicas.push(modDica);
+        }
+        
+        return dicas;
+    }
+    
+    // Gerar superpoder da dupla
+    function gerarSuperpoder(elem1, elem2) {
+        var poderes = {
+            'Fogo-Fogo': 'Velocidade e coragem para enfrentar qualquer desafio urgente.',
+            'Fogo-Terra': 'Transformar visão em realidade com velocidade E solidez.',
+            'Fogo-Ar': 'Ideação explosiva — de zero a conceito em tempo recorde.',
+            'Fogo-Água': 'Ação com propósito — movem montanhas quando acreditam na causa.',
+            'Terra-Terra': 'Execução impecável — nada escapa do planejamento dessa dupla.',
+            'Terra-Ar': 'Inovação viável — criam coisas novas que realmente funcionam.',
+            'Terra-Água': 'Projetos com alma — entregam resultados que fazem sentido para as pessoas.',
+            'Ar-Ar': 'Comunicação imbatível — convencem qualquer stakeholder.',
+            'Ar-Água': 'Inteligência emocional + criativa — resolvem problemas complexos de forma humana.',
+            'Água-Água': 'Leitura de ambiente sobrenatural — percebem o que ninguém disse.'
+        };
+        var key = elem1 + '-' + elem2;
+        var keyRev = elem2 + '-' + elem1;
+        return poderes[key] || poderes[keyRev] || 'Perspectivas complementares que ampliam a visão do time.';
+    }    
     // Renderizar ranking de afinidade (lista única ordenada)
     function renderRankings() {
         const wrapper = document.getElementById('rankingsWrapper');
@@ -1844,10 +2048,17 @@
         
         card.style.display = 'block';
         
-        // Contagem de signos solares
+        // Contagem
         var signoCount = {};
         var elementoCount = {};
         var ascCount = {};
+        var modalidadeCount = { 'Cardinal': 0, 'Fixo': 0, 'Mutável': 0 };
+        
+        var signoModalidade = {
+            'Áries': 'Cardinal', 'Câncer': 'Cardinal', 'Libra': 'Cardinal', 'Capricórnio': 'Cardinal',
+            'Touro': 'Fixo', 'Leão': 'Fixo', 'Escorpião': 'Fixo', 'Aquário': 'Fixo',
+            'Gêmeos': 'Mutável', 'Virgem': 'Mutável', 'Sagitário': 'Mutável', 'Peixes': 'Mutável'
+        };
         
         membrosTime.forEach(function(m) {
             var sol = m.sol_nome || 'Desconhecido';
@@ -1856,89 +2067,124 @@
             signoCount[sol] = (signoCount[sol] || 0) + 1;
             elementoCount[elem] = (elementoCount[elem] || 0) + 1;
             ascCount[asc] = (ascCount[asc] || 0) + 1;
+            if (signoModalidade[sol]) modalidadeCount[signoModalidade[sol]]++;
         });
         
-        // Encontrar os mais comuns
         var signoTop = Object.entries(signoCount).sort(function(a,b) { return b[1]-a[1]; });
         var elemTop = Object.entries(elementoCount).sort(function(a,b) { return b[1]-a[1]; });
-        var ascTop = Object.entries(ascCount).sort(function(a,b) { return b[1]-a[1]; });
-        
         var total = membrosTime.length;
-        var signoMaisComum = signoTop[0] || ['', 0];
-        var elemMaisComum = elemTop[0] || ['', 0];
-        var ascMaisComum = ascTop[0] || ['', 0];
         
-        // Emojis
         var elemEmojis = { 'Fogo': '🔥', 'Terra': '🌍', 'Ar': '💨', 'Água': '💧' };
+        var elemColors = { 'Fogo': '#ef4444', 'Terra': '#22c55e', 'Ar': '#60a5fa', 'Água': '#06b6d4' };
         var signoEmojis = { 'Áries': '♈', 'Touro': '♉', 'Gêmeos': '♊', 'Câncer': '♋', 'Leão': '♌', 'Virgem': '♍', 'Libra': '♎', 'Escorpião': '♏', 'Sagitário': '♐', 'Capricórnio': '♑', 'Aquário': '♒', 'Peixes': '♓' };
         
-        // Renderizar KPI cards
+        // KPI Cards
         var statsHtml = '';
         
+        // Card 1: Total membros
         statsHtml += '<div class="kpi-card">' +
             '<div class="kpi-icon">👥</div>' +
             '<div class="kpi-value">' + total + '</div>' +
             '<div class="kpi-label">Membros</div>' +
         '</div>';
         
-        statsHtml += '<div class="kpi-card">' +
-            '<div class="kpi-icon">' + (signoEmojis[signoMaisComum[0]] || '⭐') + '</div>' +
-            '<div class="kpi-value">' + signoMaisComum[0] + '</div>' +
-            '<div class="kpi-label">Signo mais comum (' + signoMaisComum[1] + ')</div>' +
+        // Card 2: Signos - mini ranking top 5
+        var signoListHtml = signoTop.slice(0, 5).map(function(s) {
+            var pct = Math.round((s[1] / total) * 100);
+            return '<div style="display:flex;align-items:center;gap:6px;margin:3px 0;font-size:0.75rem;">' +
+                '<span>' + (signoEmojis[s[0]] || '') + '</span>' +
+                '<span style="flex:1;color:var(--text-primary);">' + s[0] + '</span>' +
+                '<span style="color:var(--accent-gold);font-weight:600;">' + pct + '%</span>' +
+                '<div style="width:40px;height:4px;background:var(--bg-primary);border-radius:2px;overflow:hidden;">' +
+                    '<div style="width:' + pct + '%;height:100%;background:var(--accent-gold);border-radius:2px;"></div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        
+        statsHtml += '<div class="kpi-card" style="text-align:left;">' +
+            '<div class="kpi-label" style="margin-bottom:8px;text-align:center;">☀️ SIGNOS SOLARES</div>' +
+            signoListHtml +
         '</div>';
         
-        statsHtml += '<div class="kpi-card">' +
-            '<div class="kpi-icon">' + (elemEmojis[elemMaisComum[0]] || '✨') + '</div>' +
-            '<div class="kpi-value">' + elemMaisComum[0] + '</div>' +
-            '<div class="kpi-label">Elemento dominante (' + Math.round((elemMaisComum[1]/total)*100) + '%)</div>' +
-        '</div>';
+        // Card 3: Elementos - barras de distribuição
+        var elemListHtml = elemTop.map(function(e) {
+            var pct = Math.round((e[1] / total) * 100);
+            var color = elemColors[e[0]] || 'var(--accent-purple)';
+            return '<div style="display:flex;align-items:center;gap:6px;margin:4px 0;font-size:0.75rem;">' +
+                '<span>' + (elemEmojis[e[0]] || '') + '</span>' +
+                '<span style="width:40px;color:var(--text-primary);">' + e[0] + '</span>' +
+                '<div style="flex:1;height:6px;background:var(--bg-primary);border-radius:3px;overflow:hidden;">' +
+                    '<div style="width:' + pct + '%;height:100%;background:' + color + ';border-radius:3px;"></div>' +
+                '</div>' +
+                '<span style="color:' + color + ';font-weight:600;width:30px;text-align:right;">' + pct + '%</span>' +
+            '</div>';
+        }).join('');
         
-        statsHtml += '<div class="kpi-card">' +
-            '<div class="kpi-icon">' + (Object.keys(elementoCount).length === 4 ? '🌈' : '🎯') + '</div>' +
-            '<div class="kpi-value">' + Object.keys(elementoCount).length + '/4</div>' +
-            '<div class="kpi-label">Elementos presentes</div>' +
+        statsHtml += '<div class="kpi-card" style="text-align:left;">' +
+            '<div class="kpi-label" style="margin-bottom:8px;text-align:center;">✨ ELEMENTOS</div>' +
+            elemListHtml +
         '</div>';
         
         statsDiv.innerHTML = statsHtml;
         
-        // Gerar texto de perfil do time
-        var elemDominante = elemMaisComum[0];
-        var elemPct = Math.round((elemMaisComum[1] / total) * 100);
+        // Texto de leitura do time
+        var elemDominante = elemTop[0][0];
+        var elemPct = Math.round((elemTop[0][1] / total) * 100);
         
         var elemDescricoes = {
-            'Fogo': 'Com ' + elemPct + '% de energia de Fogo, este time é movido por ação, entusiasmo e iniciativa. São pessoas que gostam de liderar, inovar e não têm medo de arriscar.',
-            'Terra': 'Com ' + elemPct + '% de energia de Terra, este time é prático, estável e orientado a resultados. São pessoas que trazem solidez, organização e foco no que precisa ser feito.',
-            'Ar': 'Com ' + elemPct + '% de energia de Ar, este time é comunicativo, criativo e cheio de ideias. São pessoas que conectam, pensam fora da caixa e adoram brainstorming.',
-            'Água': 'Com ' + elemPct + '% de energia de Água, este time é intuitivo, empático e colaborativo. São pessoas que se preocupam com o todo, têm sensibilidade e constroem laços fortes.'
+            'Fogo': 'movido por ação, entusiasmo e iniciativa. São pessoas que gostam de liderar, inovar e não têm medo de arriscar.',
+            'Terra': 'prático, estável e orientado a resultados. São pessoas que trazem solidez, organização e foco no que precisa ser feito.',
+            'Ar': 'comunicativo, criativo e cheio de ideias. São pessoas que conectam, pensam fora da caixa e adoram brainstorming.',
+            'Água': 'intuitivo, empático e colaborativo. São pessoas que se preocupam com o todo, têm sensibilidade e constroem laços fortes.'
         };
         
-        var texto = (elemDescricoes[elemDominante] || 'Time diverso com múltiplas energias!');
+        var texto = '<strong>' + (elemEmojis[elemDominante] || '') + ' Energia dominante: ' + elemDominante + ' (' + elemPct + '%)</strong><br>';
+        texto += 'Este time é ' + (elemDescricoes[elemDominante] || 'diverso e cheio de potencial.');
         
-        // Diversidade
+        // Diversidade de elementos
         var numElementos = Object.keys(elementoCount).length;
         if (numElementos === 4) {
-            texto += '<br><br>🌈 O time tem todos os 4 elementos representados — equilíbrio entre ação (Fogo), praticidade (Terra), ideias (Ar) e empatia (Água). Isso traz versatilidade para enfrentar qualquer desafio.';
+            texto += '<br><br>🌈 <strong>Equilíbrio:</strong> Todos os 4 elementos presentes! O time consegue equilibrar ação, planejamento, comunicação e empatia naturalmente.';
         } else if (numElementos === 3) {
-            texto += '<br><br>🌈 O time tem 3 dos 4 elementos — boa diversidade de estilos e formas de pensar.';
-        } else if (numElementos <= 2) {
-            texto += '<br><br>🎯 O time tem perfis bem alinhados — muita sintonia natural entre os membros.';
+            texto += '<br><br>🌈 <strong>Variedade:</strong> 3 dos 4 elementos presentes — boa diversidade de estilos de trabalho.';
+        } else {
+            texto += '<br><br>🎯 <strong>Sintonia:</strong> Perfis bem alinhados — muita conexão natural entre os membros.';
         }
         
-        // Distribuição detalhada
-        texto += '<br><br><strong>Distribuição:</strong> ';
-        elemTop.forEach(function(e, idx) {
-            texto += (elemEmojis[e[0]] || '') + ' ' + e[0] + ' (' + e[1] + ')';
-            if (idx < elemTop.length - 1) texto += ' · ';
-        });
+        // Modalidade (Cardinal, Fixo, Mutável)
+        var modTop = Object.entries(modalidadeCount).sort(function(a,b) { return b[1]-a[1]; });
+        var modDominante = modTop[0][0];
+        var modDescricoes = {
+            'Cardinal': '<br><br>🚀 <strong>Perfil de liderança:</strong> A maioria tem signos Cardinais (iniciadores) — o time gosta de começar coisas novas, tomar decisões e agir rápido.',
+            'Fixo': '<br><br>⚓ <strong>Perfil de persistência:</strong> A maioria tem signos Fixos — o time é determinado, consistente e leva as coisas até o fim.',
+            'Mutável': '<br><br>🦋 <strong>Perfil adaptável:</strong> A maioria tem signos Mutáveis — o time é flexível, se adapta rápido a mudanças e busca soluções criativas.'
+        };
+        if (modTop[0][1] > total * 0.4) {
+            texto += modDescricoes[modDominante] || '';
+        }
         
-        // Curiosidade sobre signo
-        if (signoMaisComum[1] >= 3) {
-            texto += '<br><br>⭐ <strong>Curiosidade:</strong> ' + signoMaisComum[1] + ' pessoas do time são de ' + signoMaisComum[0] + '!';
+        // Curiosidade
+        if (signoTop[0][1] >= 3) {
+            texto += '<br><br>⭐ <strong>Curiosidade:</strong> ' + signoTop[0][1] + ' pessoas são de ' + signoTop[0][0] + ' ' + (signoEmojis[signoTop[0][0]] || '') + '! ';
+            if (signoTop.length > 1 && signoTop[1][1] >= 2) {
+                texto += 'Seguido por ' + signoTop[1][1] + ' de ' + signoTop[1][0] + ' ' + (signoEmojis[signoTop[1][0]] || '') + '.';
+            }
+        }
+        
+        // Dica de dinâmica
+        texto += '<br><br>💡 <strong>Dica de dinâmica:</strong> ';
+        if (elemDominante === 'Fogo') {
+            texto += 'Times com muita energia de Fogo rendem melhor com sprints curtos, metas audaciosas e celebrações frequentes. Cuidado só com a impaciência!';
+        } else if (elemDominante === 'Terra') {
+            texto += 'Times com muita energia de Terra rendem melhor com planejamento claro, processos definidos e reconhecimento concreto. Incentive a experimentação!';
+        } else if (elemDominante === 'Ar') {
+            texto += 'Times com muita energia de Ar rendem melhor com brainstormings, flexibilidade e espaço para trocar ideias. Ajude a converter ideias em ação!';
+        } else if (elemDominante === 'Água') {
+            texto += 'Times com muita energia de Água rendem melhor com segurança psicológica, 1:1s frequentes e projetos com propósito. Valorize a intuição do grupo!';
         }
         
         textDiv.innerHTML = texto;
     }
-
     // Máscara de data dd/mm/aaaa
     document.getElementById('dataNasc').addEventListener('input', function(e) {
         let v = e.target.value.replace(/\D/g, '');
