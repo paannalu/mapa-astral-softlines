@@ -705,12 +705,7 @@
             margin-top: 8px;
         }
         .ranking-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        @media (max-width: 600px) {
-            .ranking-section { grid-template-columns: 1fr; }
+            max-width: 500px;
         }
         .ranking-column h3 {
             font-size: 0.9rem;
@@ -1731,7 +1726,7 @@
             '</div>';
     }
     
-    // Renderizar rankings (top compatíveis + mais desafiadores)
+    // Renderizar ranking de afinidade (lista única ordenada)
     function renderRankings() {
         const wrapper = document.getElementById('rankingsWrapper');
         if (!wrapper || membrosTime.length < 2) {
@@ -1754,34 +1749,26 @@
             }
         }
         
-        // Ordenar
-        var topCompat = duplas.slice().sort(function(a, b) { return b.score - a.score; }).slice(0, 5);
-        var topDesafio = duplas.slice().sort(function(a, b) { return a.score - b.score; }).slice(0, 5);
+        // Ordenar do mais compatível para o menos
+        duplas.sort(function(a, b) { return b.score - a.score; });
         
-        function renderList(items, isHigh) {
+        function renderList(items) {
             return items.map(function(d, idx) {
-                var posClass = idx === 0 ? 'gold' : 'silver';
-                var scoreClass = isHigh ? 'high' : 'low';
+                var posClass = idx < 3 ? 'gold' : 'silver';
                 var stars = '';
                 for (var s = 0; s < 5; s++) stars += s < d.score ? '★' : '☆';
                 return '<div class="ranking-item">' +
                     '<div class="ranking-pos ' + posClass + '">' + (idx + 1) + '</div>' +
                     '<div class="ranking-names">' + d.emoji1 + ' ' + d.nome1 + ' & ' + d.emoji2 + ' ' + d.nome2 + '</div>' +
-                    '<div class="ranking-score ' + scoreClass + '">' + stars + '</div>' +
+                    '<div class="ranking-score high">' + stars + '</div>' +
                 '</div>';
             }).join('');
         }
         
         wrapper.innerHTML = 
-            '<div class="ranking-section">' +
-                '<div class="ranking-column">' +
-                    '<h3>🤗 Mais compatíveis</h3>' +
-                    renderList(topCompat, true) +
-                '</div>' +
-                '<div class="ranking-column">' +
-                    '<h3>⚡ Mais desafiadores</h3>' +
-                    renderList(topDesafio, false) +
-                '</div>' +
+            '<div>' +
+                '<h3 style="font-size:0.9rem;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-subtle);">🤗 Ranking de Afinidade do Time</h3>' +
+                renderList(duplas) +
             '</div>';
     }
 
