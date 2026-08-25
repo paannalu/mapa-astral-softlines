@@ -1067,15 +1067,21 @@
 
     function calcularCompatDupla(membro1, membro2) {
         // Score baseado nos elementos de Sol e Ascendente de ambos
-        const keySolSol = `${membro1.sol_elemento}-${membro2.sol_elemento}`;
-        const keyAscAsc = `${membro1.asc_elemento}-${membro2.asc_elemento}`;
-        const keySolAsc = `${membro1.sol_elemento}-${membro2.asc_elemento}`;
-        const keyAscSol = `${membro1.asc_elemento}-${membro2.sol_elemento}`;
+        // Proteção contra campos undefined
+        const sol1 = membro1.sol_elemento || 'Fogo';
+        const sol2 = membro2.sol_elemento || 'Fogo';
+        const asc1 = membro1.asc_elemento || sol1;
+        const asc2 = membro2.asc_elemento || sol2;
         
-        const s1 = COMPAT_ELEMENTOS[keySolSol] || 3;
-        const s2 = COMPAT_ELEMENTOS[keyAscAsc] || 3;
-        const s3 = COMPAT_ELEMENTOS[keySolAsc] || 3;
-        const s4 = COMPAT_ELEMENTOS[keyAscSol] || 3;
+        const keySolSol = sol1 + '-' + sol2;
+        const keyAscAsc = asc1 + '-' + asc2;
+        const keySolAsc = sol1 + '-' + asc2;
+        const keyAscSol = asc1 + '-' + sol2;
+        
+        const s1 = COMPAT_ELEMENTOS[keySolSol] || COMPAT_ELEMENTOS[sol2 + '-' + sol1] || 3;
+        const s2 = COMPAT_ELEMENTOS[keyAscAsc] || COMPAT_ELEMENTOS[asc2 + '-' + asc1] || 3;
+        const s3 = COMPAT_ELEMENTOS[keySolAsc] || COMPAT_ELEMENTOS[asc2 + '-' + sol1] || 3;
+        const s4 = COMPAT_ELEMENTOS[keyAscSol] || COMPAT_ELEMENTOS[sol2 + '-' + asc1] || 3;
         
         // Média ponderada (Sol-Sol tem mais peso)
         const media = (s1 * 2 + s2 * 1.5 + s3 + s4) / 5.5;
@@ -1147,9 +1153,13 @@
             .then(function(result) {
                 if (result.success && result.data && result.data.length > 0) {
                     membrosTime = result.data;
+                    // Salvar no localStorage como cache para próxima visita
+                    localStorage.setItem('mapaAstral_membros', JSON.stringify(membrosTime));
                     usandoSheets = true;
                     atualizarStatus(true);
+                    // Re-renderizar a aba ativa
                     renderizarTime();
+                    renderizarMatriz();
                 }
             }).catch(function(e) {
                 console.warn('Google Sheets indisponível');
@@ -1264,12 +1274,26 @@
     }
 
     function gerarMatriz() {
-        carregarMembros();
+        // Reload members and render matrix
+        membrosTime = JSON.parse(localStorage.getItem('mapaAstral_membros') || '[]');
         renderizarMatriz();
+        
+        // Also try loading from Sheets in background
+        if (isGoogleSheetsConfigured()) {
+            fetch(SCRIPT_URL).then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success && result.data && result.data.length > 0) {
+                    membrosTime = result.data;
+                    localStorage.setItem('mapaAstral_membros', JSON.stringify(membrosTime));
+                    renderizarMatriz();
+                }
+            }).catch(function() {});
+        }
     }
 
     function renderizarMatriz() {
         const wrapper = document.getElementById('matrixWrapper');
+        if (!wrapper) return;
         
         if (membrosTime.length < 2) {
             wrapper.innerHTML = `
@@ -1280,6 +1304,8 @@
                 </div>`;
             return;
         }
+        
+        try {
         
         let html = '<table class="matrix-table"><thead><tr><th></th>';
         
@@ -1306,6 +1332,10 @@
         
         html += '</tbody></table>';
         wrapper.innerHTML = html;
+        } catch(e) {
+            console.error('Erro ao renderizar matriz:', e);
+            wrapper.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Erro ao carregar matriz</h3><p>Tente recarregar a página.</p></div>';
+        }
     }
 
     // ============== EVENT HANDLERS ==============
