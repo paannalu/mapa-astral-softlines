@@ -891,6 +891,89 @@
         .mural-member-name { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
         .mural-member-title { font-size: 0.72rem; color: var(--accent-gold); font-style: italic; }
         .mural-member-signs { font-size: 0.7rem; color: var(--text-secondary); margin-left: auto; }
+
+        /* Dimensões de estilo */
+        .dim-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            font-size: 0.72rem;
+        }
+        .dim-label-left, .dim-label-right {
+            width: 95px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        .dim-label-left { text-align: right; }
+        .dim-label-right { text-align: left; }
+        .dim-bar-track {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            position: relative;
+            min-width: 80px;
+        }
+        .dim-bar-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+            border: 2px solid var(--bg-secondary);
+            transition: left 0.3s;
+        }
+        .dim-bar-marker.marker-1 {
+            background: var(--accent-purple-light);
+            width: 10px;
+            height: 10px;
+        }
+        .dim-bar-marker.marker-2 {
+            background: var(--accent-gold);
+            width: 10px;
+            height: 10px;
+        }
+        .dims-compare-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .adapt-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-top: 8px;
+        }
+        .adapt-section h4 {
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+        .adapt-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .adapt-section li {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding: 4px 0 4px 14px;
+            position: relative;
+            line-height: 1.5;
+        }
+        .adapt-section li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-purple-light);
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -1041,6 +1124,10 @@
                         <p id="resumoTexto"></p>
                     </div>
 
+                    <div class="summary-box" style="margin-top: 16px;">
+                        <h3><i class="fas fa-chart-bar"></i> Seu Estilo de Trabalho</h3>
+                        <div id="dimensoesResult"></div>
+                    </div>
                     <div class="summary-box" style="margin-top: 16px;">
                         <h3><i class="fas fa-people-arrows"></i> Compatibilidade</h3>
                         <p style="margin-bottom: 12px; font-size: 0.9rem;">Signos que mais combinam e menos combinam com você:</p>
@@ -1504,6 +1591,13 @@
         var tituloEl = document.getElementById('tituloAstral');
         if (tituloEl) tituloEl.textContent = '✦ ' + gerarTituloAstral(sol.nome, asc.nome);
         
+        // Mostrar dimensões de estilo
+        var dimsEl = document.getElementById('dimensoesResult');
+        if (dimsEl) {
+            var dims = calcularDimensoes(sol.nome, asc.nome);
+            dimsEl.innerHTML = renderDimensoes(dims);
+        }
+        
         // Compatibilidade individual
         const compat = obterCompatibilidade(sol);
         const altaDiv = document.getElementById('compatAlta');
@@ -1558,7 +1652,11 @@
                         ${criarBadgeElemento(m.sol_elemento || 'Ar')}
                         ${criarBadgeElemento(m.asc_elemento || 'Ar')}
                     </div>
-                    <div class="member-summary">${(m.resumo || '').substring(0, 200)}${(m.resumo || '').length > 200 ? '...' : ''}</div>
+                    <div class="member-summary">${(m.resumo || '').substring(0, 150)}${(m.resumo || '').length > 150 ? '...' : ''}</div>
+                    <details style="margin-top:8px;">
+                        <summary style="font-size:0.72rem;color:var(--accent-purple-light);cursor:pointer;">📊 Ver estilo de trabalho</summary>
+                        <div style="margin-top:8px;">${renderDimensoes(calcularDimensoes(m.sol_nome || '', m.asc_nome || ''))}</div>
+                    </details>
                     <div class="card-actions">
                         <button class="btn-action btn-edit" onclick="editarMembro('${m.nome}')" title="Editar">
                             <i class="fas fa-edit"></i> Editar
@@ -2001,6 +2099,32 @@
         var superpoder = gerarSuperpoder(elem1, elem2);
         html += '<div class="insight-superpower">';
         html += '<strong>⚡ Superpoder da dupla:</strong> ' + superpoder;
+        html += '</div>';
+        
+        // Dimensões lado a lado
+        var dims1 = calcularDimensoes(sol1, m1.asc_nome || '');
+        var dims2 = calcularDimensoes(sol2, m2.asc_nome || '');
+        
+        html += '<div class="insight-section" style="margin-top:16px;">';
+        html += '<h4>📊 Estilos de Trabalho Comparados</h4>';
+        html += renderDimensoesComparacao(dims1, dims2, m1.nome, m2.nome);
+        html += '</div>';
+        
+        // Como me adaptar
+        var adaptacao = gerarDicasAdaptacao(dims1, dims2, m1.nome, m2.nome);
+        
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">';
+        
+        html += '<div class="adapt-section">';
+        html += '<h4 style="color:var(--accent-purple-light);">🔄 ' + m1.nome + ', ao trabalhar com ' + m2.nome + ':</h4>';
+        html += '<ul>' + adaptacao.dicas1.map(function(d) { return '<li>' + d + '</li>'; }).join('') + '</ul>';
+        html += '</div>';
+        
+        html += '<div class="adapt-section">';
+        html += '<h4 style="color:var(--accent-gold);">🔄 ' + m2.nome + ', ao trabalhar com ' + m1.nome + ':</h4>';
+        html += '<ul>' + adaptacao.dicas2.map(function(d) { return '<li>' + d + '</li>'; }).join('') + '</ul>';
+        html += '</div>';
+        
         html += '</div>';
         
         html += '</div></div>';
@@ -2601,6 +2725,169 @@
         });
         
         container.innerHTML = html;
+    }
+
+
+    // Calcular dimensões de estilo de trabalho (0-100 em cada eixo)
+    function calcularDimensoes(solNome, ascNome) {
+        var elemPorSigno = {
+            'Áries':'Fogo','Touro':'Terra','Gêmeos':'Ar','Câncer':'Água',
+            'Leão':'Fogo','Virgem':'Terra','Libra':'Ar','Escorpião':'Água',
+            'Sagitário':'Fogo','Capricórnio':'Terra','Aquário':'Ar','Peixes':'Água'
+        };
+        var modPorSigno = {
+            'Áries':'Cardinal','Touro':'Fixo','Gêmeos':'Mutável','Câncer':'Cardinal',
+            'Leão':'Fixo','Virgem':'Mutável','Libra':'Cardinal','Escorpião':'Fixo',
+            'Sagitário':'Mutável','Capricórnio':'Cardinal','Aquário':'Fixo','Peixes':'Mutável'
+        };
+        
+        var solElem = elemPorSigno[solNome] || 'Fogo';
+        var ascElem = elemPorSigno[ascNome] || solElem;
+        var solMod = modPorSigno[solNome] || 'Cardinal';
+        var ascMod = modPorSigno[ascNome] || solMod;
+        
+        // Scores base por elemento (para cada dimensão, 0 = esquerda, 100 = direita)
+        // Dim 1: Ação (0) ↔ Planejamento (100)
+        var acaoMap = {'Fogo': 15, 'Ar': 35, 'Terra': 80, 'Água': 70};
+        // Dim 2: Autonomia (0) ↔ Colaboração (100)
+        var autoMap = {'Cardinal': 20, 'Fixo': 45, 'Mutável': 80};
+        // Dim 3: Direto (0) ↔ Diplomático (100)
+        var diretoMap = {'Fogo': 15, 'Ar': 40, 'Terra': 60, 'Água': 85};
+        // Dim 4: Risco (0) ↔ Segurança (100)
+        var riscoMap = {'Fogo': 20, 'Ar': 35, 'Água': 65, 'Terra': 80};
+        // Dim 5: Racional (0) ↔ Intuitivo (100)
+        var racioMap = {'Ar': 15, 'Terra': 35, 'Fogo': 65, 'Água': 85};
+        
+        // Combinar Sol (60%) + Ascendente (40%)
+        function mix(mapElem, mapMod, useMod) {
+            if (useMod) {
+                var sol = mapMod[solMod] || 50;
+                var asc = mapMod[ascMod] || 50;
+            } else {
+                var sol = mapElem[solElem] || 50;
+                var asc = mapElem[ascElem] || 50;
+            }
+            return Math.round(sol * 0.6 + asc * 0.4);
+        }
+        
+        return {
+            acao: mix(acaoMap, null, false),          // Ação ↔ Planejamento
+            autonomia: mix(null, autoMap, true),      // Autonomia ↔ Colaboração
+            direto: mix(diretoMap, null, false),      // Direto ↔ Diplomático
+            risco: mix(riscoMap, null, false),        // Risco ↔ Segurança
+            racional: mix(racioMap, null, false)      // Racional ↔ Intuitivo
+        };
+    }
+    
+    // Gerar HTML das barras de dimensão
+    function renderDimensoes(dims) {
+        var dimensoes = [
+            { nome: 'Ação', nomeR: 'Planejamento', valor: dims.acao, iconL: '⚡', iconR: '📋' },
+            { nome: 'Autonomia', nomeR: 'Colaboração', valor: dims.autonomia, iconL: '🎯', iconR: '🤝' },
+            { nome: 'Direto', nomeR: 'Diplomático', valor: dims.direto, iconL: '💬', iconR: '🕊️' },
+            { nome: 'Risco', nomeR: 'Segurança', valor: dims.risco, iconL: '🚀', iconR: '🛡️' },
+            { nome: 'Racional', nomeR: 'Intuitivo', valor: dims.racional, iconL: '🧠', iconR: '💡' }
+        ];
+        
+        return dimensoes.map(function(d) {
+            return '<div class="dim-row">' +
+                '<span class="dim-label-left">' + d.iconL + ' ' + d.nome + '</span>' +
+                '<div class="dim-bar-track">' +
+                    '<div class="dim-bar-marker" style="left:' + d.valor + '%;"></div>' +
+                '</div>' +
+                '<span class="dim-label-right">' + d.nomeR + ' ' + d.iconR + '</span>' +
+            '</div>';
+        }).join('');
+    }
+    
+    // Gerar comparação lado a lado de dimensões
+    function renderDimensoesComparacao(dims1, dims2, nome1, nome2) {
+        var dimensoes = [
+            { nome: 'Ação', nomeR: 'Planejamento', v1: dims1.acao, v2: dims2.acao, iconL: '⚡', iconR: '📋' },
+            { nome: 'Autonomia', nomeR: 'Colaboração', v1: dims1.autonomia, v2: dims2.autonomia, iconL: '🎯', iconR: '🤝' },
+            { nome: 'Direto', nomeR: 'Diplomático', v1: dims1.direto, v2: dims2.direto, iconL: '💬', iconR: '🕊️' },
+            { nome: 'Risco', nomeR: 'Segurança', v1: dims1.risco, v2: dims2.risco, iconL: '🚀', iconR: '🛡️' },
+            { nome: 'Racional', nomeR: 'Intuitivo', v1: dims1.racional, v2: dims2.racional, iconL: '🧠', iconR: '💡' }
+        ];
+        
+        return '<div class="dims-compare-header">' +
+            '<span style="color:var(--accent-purple-light);">● ' + nome1 + '</span>' +
+            '<span style="color:var(--accent-gold);">● ' + nome2 + '</span>' +
+        '</div>' +
+        dimensoes.map(function(d) {
+            return '<div class="dim-row">' +
+                '<span class="dim-label-left">' + d.iconL + ' ' + d.nome + '</span>' +
+                '<div class="dim-bar-track">' +
+                    '<div class="dim-bar-marker marker-1" style="left:' + d.v1 + '%;"></div>' +
+                    '<div class="dim-bar-marker marker-2" style="left:' + d.v2 + '%;"></div>' +
+                '</div>' +
+                '<span class="dim-label-right">' + d.nomeR + ' ' + d.iconR + '</span>' +
+            '</div>';
+        }).join('');
+    }
+    
+    // Gerar "Como me adaptar" - dicas personalizadas para cada pessoa
+    function gerarDicasAdaptacao(dims1, dims2, nome1, nome2) {
+        var dicas1 = []; // Dicas para pessoa 1 ao trabalhar com pessoa 2
+        var dicas2 = []; // Dicas para pessoa 2 ao trabalhar com pessoa 1
+        
+        var diff;
+        
+        // Ação vs Planejamento
+        diff = dims2.acao - dims1.acao;
+        if (diff > 25) {
+            dicas1.push(nome2 + ' precisa de mais tempo para planejar — apresente ideias com antecedência');
+            dicas2.push(nome1 + ' gosta de agir rápido — tente dar respostas mais diretas');
+        } else if (diff < -25) {
+            dicas1.push(nome2 + ' é mais impulsivo(a) — acompanhe o ritmo e sugira pausas para alinhar');
+            dicas2.push(nome1 + ' é mais metódico(a) — traga dados e contexto antes de propor mudanças');
+        }
+        
+        // Autonomia vs Colaboração
+        diff = dims2.autonomia - dims1.autonomia;
+        if (diff > 25) {
+            dicas1.push(nome2 + ' prefere decidir em grupo — inclua-o(a) nas decisões desde o início');
+            dicas2.push(nome1 + ' é mais autônomo(a) — dê espaço e depois peça updates');
+        } else if (diff < -25) {
+            dicas1.push(nome2 + ' é mais independente — evite microgerenciar, confie no processo');
+            dicas2.push(nome1 + ' valoriza colaboração — compartilhe ideias mesmo em estágio inicial');
+        }
+        
+        // Direto vs Diplomático
+        diff = dims2.direto - dims1.direto;
+        if (diff > 25) {
+            dicas1.push(nome2 + ' é mais diplomático(a) — preste atenção no contexto, não só nas palavras');
+            dicas2.push(nome1 + ' é mais direto(a) — não leve a franqueza para o pessoal');
+        } else if (diff < -25) {
+            dicas1.push(nome2 + ' é mais direto(a) — feedbacks sinceros são demonstração de confiança');
+            dicas2.push(nome1 + ' é mais sutil — pergunte "como você realmente se sente sobre isso?"');
+        }
+        
+        // Risco vs Segurança
+        diff = dims2.risco - dims1.risco;
+        if (diff > 25) {
+            dicas1.push(nome2 + ' é mais cauteloso(a) — apresente planos B para ganhar confiança');
+            dicas2.push(nome1 + ' gosta de arriscar — apoie experimentações com escopo pequeno');
+        } else if (diff < -25) {
+            dicas1.push(nome2 + ' é mais ousado(a) — tente não frear todas as ideias de cara');
+            dicas2.push(nome1 + ' precisa de segurança — mostre evidências antes de propor algo radical');
+        }
+        
+        // Racional vs Intuitivo
+        diff = dims2.racional - dims1.racional;
+        if (diff > 25) {
+            dicas1.push(nome2 + ' é mais intuitivo(a) — pergunte "o que seu instinto diz?" em decisões');
+            dicas2.push(nome1 + ' é mais racional — traga argumentos lógicos para convencer');
+        } else if (diff < -25) {
+            dicas1.push(nome2 + ' é mais analítico(a) — traga números e fatos nas discussões');
+            dicas2.push(nome1 + ' confia na intuição — respeite quando disser "sinto que não é o caminho"');
+        }
+        
+        // Fallback
+        if (dicas1.length === 0) dicas1.push('Vocês têm estilos similares — foquem em se desafiar mutuamente');
+        if (dicas2.length === 0) dicas2.push('Vocês têm estilos similares — foquem em se desafiar mutuamente');
+        
+        return { dicas1: dicas1, dicas2: dicas2 };
     }
 
     // Máscara de data dd/mm/aaaa
