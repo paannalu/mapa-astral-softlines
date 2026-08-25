@@ -918,9 +918,7 @@
             <button class="tab-btn" data-tab="compat-tab">
                 <i class="fas fa-people-arrows"></i> Compatibilidade
             </button>
-            <button class="tab-btn" data-tab="mural-tab">
-                <i class="fas fa-palette"></i> Mural
-            </button>
+
         </div>
 
         <!-- Tab: Form -->
@@ -1182,6 +1180,22 @@
         'Água-Fogo': 2, 'Água-Terra': 5, 'Água-Ar': 3, 'Água-Água': 4
     };
 
+    const COMPAT_SIGNOS = {
+        'Áries-Áries':4,'Áries-Touro':2,'Áries-Gêmeos':4,'Áries-Câncer':2,'Áries-Leão':5,'Áries-Virgem':3,'Áries-Libra':3,'Áries-Escorpião':3,'Áries-Sagitário':5,'Áries-Capricórnio':2,'Áries-Aquário':4,'Áries-Peixes':2,
+        'Touro-Áries':2,'Touro-Touro':4,'Touro-Gêmeos':2,'Touro-Câncer':4,'Touro-Leão':2,'Touro-Virgem':5,'Touro-Libra':3,'Touro-Escorpião':3,'Touro-Sagitário':3,'Touro-Capricórnio':5,'Touro-Aquário':2,'Touro-Peixes':4,
+        'Gêmeos-Áries':4,'Gêmeos-Touro':2,'Gêmeos-Gêmeos':4,'Gêmeos-Câncer':2,'Gêmeos-Leão':4,'Gêmeos-Virgem':2,'Gêmeos-Libra':5,'Gêmeos-Escorpião':3,'Gêmeos-Sagitário':3,'Gêmeos-Capricórnio':3,'Gêmeos-Aquário':5,'Gêmeos-Peixes':2,
+        'Câncer-Áries':2,'Câncer-Touro':4,'Câncer-Gêmeos':2,'Câncer-Câncer':4,'Câncer-Leão':2,'Câncer-Virgem':4,'Câncer-Libra':2,'Câncer-Escorpião':5,'Câncer-Sagitário':3,'Câncer-Capricórnio':3,'Câncer-Aquário':3,'Câncer-Peixes':5,
+        'Leão-Áries':5,'Leão-Touro':2,'Leão-Gêmeos':4,'Leão-Câncer':2,'Leão-Leão':4,'Leão-Virgem':2,'Leão-Libra':4,'Leão-Escorpião':2,'Leão-Sagitário':5,'Leão-Capricórnio':3,'Leão-Aquário':3,'Leão-Peixes':3,
+        'Virgem-Áries':3,'Virgem-Touro':5,'Virgem-Gêmeos':2,'Virgem-Câncer':4,'Virgem-Leão':2,'Virgem-Virgem':4,'Virgem-Libra':2,'Virgem-Escorpião':4,'Virgem-Sagitário':2,'Virgem-Capricórnio':5,'Virgem-Aquário':3,'Virgem-Peixes':3,
+        'Libra-Áries':3,'Libra-Touro':3,'Libra-Gêmeos':5,'Libra-Câncer':2,'Libra-Leão':4,'Libra-Virgem':2,'Libra-Libra':4,'Libra-Escorpião':2,'Libra-Sagitário':4,'Libra-Capricórnio':2,'Libra-Aquário':5,'Libra-Peixes':3,
+        'Escorpião-Áries':3,'Escorpião-Touro':3,'Escorpião-Gêmeos':3,'Escorpião-Câncer':5,'Escorpião-Leão':2,'Escorpião-Virgem':4,'Escorpião-Libra':2,'Escorpião-Escorpião':4,'Escorpião-Sagitário':2,'Escorpião-Capricórnio':4,'Escorpião-Aquário':2,'Escorpião-Peixes':5,
+        'Sagitário-Áries':5,'Sagitário-Touro':3,'Sagitário-Gêmeos':3,'Sagitário-Câncer':3,'Sagitário-Leão':5,'Sagitário-Virgem':2,'Sagitário-Libra':4,'Sagitário-Escorpião':2,'Sagitário-Sagitário':4,'Sagitário-Capricórnio':2,'Sagitário-Aquário':4,'Sagitário-Peixes':2,
+        'Capricórnio-Áries':2,'Capricórnio-Touro':5,'Capricórnio-Gêmeos':3,'Capricórnio-Câncer':3,'Capricórnio-Leão':3,'Capricórnio-Virgem':5,'Capricórnio-Libra':2,'Capricórnio-Escorpião':4,'Capricórnio-Sagitário':2,'Capricórnio-Capricórnio':4,'Capricórnio-Aquário':2,'Capricórnio-Peixes':4,
+        'Aquário-Áries':4,'Aquário-Touro':2,'Aquário-Gêmeos':5,'Aquário-Câncer':3,'Aquário-Leão':3,'Aquário-Virgem':3,'Aquário-Libra':5,'Aquário-Escorpião':2,'Aquário-Sagitário':4,'Aquário-Capricórnio':2,'Aquário-Aquário':4,'Aquário-Peixes':2,
+        'Peixes-Áries':2,'Peixes-Touro':4,'Peixes-Gêmeos':2,'Peixes-Câncer':5,'Peixes-Leão':3,'Peixes-Virgem':3,'Peixes-Libra':3,'Peixes-Escorpião':5,'Peixes-Sagitário':2,'Peixes-Capricórnio':4,'Peixes-Aquário':2,'Peixes-Peixes':4
+    };
+
+
     // Personalidades por signo
     const PERSONALIDADES = {
         'Áries': 'corajoso(a), pioneiro(a) e cheio(a) de energia. Lidera com ousadia.',
@@ -1335,36 +1349,33 @@
     }
 
     function calcularCompatDupla(membro1, membro2) {
-        // Score baseado nos elementos de Sol e Ascendente de ambos
-        // Proteção contra campos undefined
-        const sol1 = membro1.sol_elemento || 'Fogo';
-        const sol2 = membro2.sol_elemento || 'Fogo';
-        const asc1 = membro1.asc_elemento || sol1;
-        const asc2 = membro2.asc_elemento || sol2;
+        // Compatibilidade baseada nos SIGNOS (não apenas elementos)
+        // Usa aspectos astrológicos: trígono (5), sextil (4), mesmo signo (4), oposição (3), quincúncio (3), quadratura (2), semi-sextil (2)
         
-        function getCompat(e1, e2) {
-            return COMPAT_ELEMENTOS[e1 + '-' + e2] || COMPAT_ELEMENTOS[e2 + '-' + e1] || 3;
+        const sol1 = membro1.sol_nome || 'Áries';
+        const sol2 = membro2.sol_nome || 'Áries';
+        const asc1 = membro1.asc_nome || sol1;
+        const asc2 = membro2.asc_nome || sol2;
+        
+        function getSignCompat(s1, s2) {
+            return COMPAT_SIGNOS[s1 + '-' + s2] || COMPAT_SIGNOS[s2 + '-' + s1] || 3;
         }
         
-        const s1 = getCompat(sol1, sol2);  // Sol-Sol (principal)
-        const s2 = getCompat(asc1, asc2);  // Asc-Asc
-        const s3 = getCompat(sol1, asc2);  // Sol1-Asc2
-        const s4 = getCompat(asc1, sol2);  // Asc1-Sol2
+        const s1 = getSignCompat(sol1, sol2);   // Sol-Sol (principal)
+        const s2 = getSignCompat(asc1, asc2);   // Asc-Asc
+        const s3 = getSignCompat(sol1, asc2);   // Sol1-Asc2
+        const s4 = getSignCompat(asc1, sol2);   // Asc1-Sol2
         
-        // Fórmula: Sol-Sol é dominante (60%), ascendentes são complementares (40%)
-        // Isso gera mais variação nos resultados
-        const base = s1;  // Score principal
-        const bonus = (s2 + s3 + s4) / 3;  // Média dos ascendentes
+        // Sol-Sol domina (55%), ascendentes complementam (45%)
+        const base = s1;
+        const bonus = (s2 + s3 + s4) / 3;
+        const media = base * 0.55 + bonus * 0.45;
         
-        // Combinar: 60% sol-sol + 40% complementares, com arredondamento que diferencia mais
-        const media = base * 0.6 + bonus * 0.4;
-        
-        // Mapear para 1-5 com mais diferenciação
-        if (media >= 4.5) return 5;
-        if (media >= 3.8) return 4;
-        if (media >= 3.0) return 3;
-        if (media >= 2.3) return 2;
-        return 1;
+        // Mapear para 2-5 (mínimo 2, sem score 1 para não gerar desconforto)
+        if (media >= 4.3) return 5;
+        if (media >= 3.5) return 4;
+        if (media >= 2.7) return 3;
+        return 2;
     }
 
     // ============== STORAGE (localStorage + Google Sheets) ==============
@@ -1643,7 +1654,7 @@
             // Load data when switching tabs
             if (btn.dataset.tab === 'team-tab') carregarTime();
             if (btn.dataset.tab === 'compat-tab') gerarMatriz();
-            if (btn.dataset.tab === 'mural-tab') { carregarMembros(); renderMural(); }
+            
         });
     });
 
@@ -1892,8 +1903,8 @@
             i < score ? '<span class="filled">★</span>' : '<span class="empty">★</span>'
         ).join('');
         
-        const labels = ['', 'Bem diferente', 'Algumas diferenças', 'Neutro', 'Boa sintonia', 'Dupla imbatível!'];
-        const emojis = ['', '⚡', '🌊', '🤝', '🤗', '🫂'];
+        const labels = ['', '', 'Estilos diferentes', 'Se complementam', 'Boa sintonia', 'Dupla imbatível!'];
+        const emojis = ['', '', '🌊', '🤝', '🤗', '🫂'];
         
         // Elementos e modalidades
         var elem1 = m1.sol_elemento || 'Fogo';
@@ -2578,15 +2589,7 @@
     atualizarStatus(usandoSheets);    </script>
 
     
-        <div class="tab-content" id="mural-tab">
-            <div class="card">
-                <h2 class="card-title"><i class="fas fa-palette"></i> Mural do Time</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 16px;">
-                    Visão artística do time agrupado por elemento.
-                </p>
-            </div>
-            <div id="muralContent" class="mural-grid"></div>
-        </div>
+        
     </div>
 
 <footer style="text-align:center; padding:24px; color:var(--text-secondary); font-size:0.75rem; opacity:0.7; margin-top:40px;">
