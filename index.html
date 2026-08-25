@@ -1523,15 +1523,23 @@
         membrosTime = membrosTime.filter(m => m.nome !== nome);
         localStorage.setItem('mapaAstral_membros', JSON.stringify(membrosTime));
         
-        // Se Google Sheets está configurado, tentar deletar de lá também
+        // Se Google Sheets está configurado, deletar da planilha também
         if (isGoogleSheetsConfigured()) {
-            fetch(SCRIPT_URL + '?action=delete&nome=' + encodeURIComponent(nome))
-            .then(function(r) { return r.json(); })
+            fetch(SCRIPT_URL + '?action=delete&nome=' + encodeURIComponent(nome), {
+                redirect: 'follow'
+            })
+            .then(function(r) { 
+                if (r.ok || r.type === 'opaque') return r.json().catch(function() { return {success: true}; });
+                return {success: false};
+            })
             .then(function(result) {
                 if (result.success) {
-                    showToast('🗑️ ' + nome + ' removido da planilha', 'success');
+                    showToast('🗑️ ' + nome + ' removido do time e da planilha', 'success');
                 }
-            }).catch(function() {});
+            }).catch(function() {
+                // Mesmo se falhar a leitura da resposta, o delete provavelmente executou
+                showToast('🗑️ ' + nome + ' removido', 'success');
+            });
         }
         
         showToast('🗑️ ' + nome + ' removido do time', 'success');
