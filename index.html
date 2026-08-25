@@ -738,6 +738,53 @@
         .ranking-score.low { color: #f87171; }
         .collapsible-header { cursor: pointer; }
         .collapsible-header:hover h2 { color: var(--accent-purple-light); }
+
+        .stat-badge {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .stat-badge .stat-number {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .kpi-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+        .kpi-icon {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+        }
+        .kpi-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+        .kpi-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
     </style>
 </head>
 <body>
@@ -912,6 +959,14 @@
                 <button class="btn-secondary" onclick="carregarTime()">
                     <i class="fas fa-sync-alt"></i> Atualizar
                 </button>
+            </div>
+            <!-- Perfil do Time - KPI Cards -->
+            <div id="teamProfileCard" style="display:none;">
+                <div class="kpi-grid" id="teamStats"></div>
+                <div class="card" style="margin-top:16px;">
+                    <h2 class="card-title"><i class="fas fa-scroll"></i> Leitura do Time</h2>
+                    <div id="teamProfileText" style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;"></div>
+                </div>
             </div>
             <div class="team-grid" id="teamGrid">
                 <div class="empty-state" id="teamEmpty">
@@ -1259,6 +1314,7 @@
                     // Re-renderizar a aba ativa
                     renderizarTime();
                     renderizarMatriz();
+                    renderTeamProfile();
                 }
             }).catch(function(e) {
                 console.warn('Google Sheets indisponível');
@@ -1327,6 +1383,7 @@
     function carregarTime() {
         carregarMembros();
         renderizarTime();
+        renderTeamProfile();
     }
 
     function renderizarTime() {
@@ -1771,6 +1828,115 @@
                 '<h3 style="font-size:0.9rem;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-subtle);">🫂 Melhores duplas</h3>' +
                 renderList(duplas) +
             '</div>';
+    }
+
+
+    // Gerar perfil do time (KPI cards + texto)
+    function renderTeamProfile() {
+        const card = document.getElementById('teamProfileCard');
+        const statsDiv = document.getElementById('teamStats');
+        const textDiv = document.getElementById('teamProfileText');
+        
+        if (!card || membrosTime.length < 2) {
+            if (card) card.style.display = 'none';
+            return;
+        }
+        
+        card.style.display = 'block';
+        
+        // Contagem de signos solares
+        var signoCount = {};
+        var elementoCount = {};
+        var ascCount = {};
+        
+        membrosTime.forEach(function(m) {
+            var sol = m.sol_nome || 'Desconhecido';
+            var elem = m.sol_elemento || 'Desconhecido';
+            var asc = m.asc_nome || 'Desconhecido';
+            signoCount[sol] = (signoCount[sol] || 0) + 1;
+            elementoCount[elem] = (elementoCount[elem] || 0) + 1;
+            ascCount[asc] = (ascCount[asc] || 0) + 1;
+        });
+        
+        // Encontrar os mais comuns
+        var signoTop = Object.entries(signoCount).sort(function(a,b) { return b[1]-a[1]; });
+        var elemTop = Object.entries(elementoCount).sort(function(a,b) { return b[1]-a[1]; });
+        var ascTop = Object.entries(ascCount).sort(function(a,b) { return b[1]-a[1]; });
+        
+        var total = membrosTime.length;
+        var signoMaisComum = signoTop[0] || ['', 0];
+        var elemMaisComum = elemTop[0] || ['', 0];
+        var ascMaisComum = ascTop[0] || ['', 0];
+        
+        // Emojis
+        var elemEmojis = { 'Fogo': '🔥', 'Terra': '🌍', 'Ar': '💨', 'Água': '💧' };
+        var signoEmojis = { 'Áries': '♈', 'Touro': '♉', 'Gêmeos': '♊', 'Câncer': '♋', 'Leão': '♌', 'Virgem': '♍', 'Libra': '♎', 'Escorpião': '♏', 'Sagitário': '♐', 'Capricórnio': '♑', 'Aquário': '♒', 'Peixes': '♓' };
+        
+        // Renderizar KPI cards
+        var statsHtml = '';
+        
+        statsHtml += '<div class="kpi-card">' +
+            '<div class="kpi-icon">👥</div>' +
+            '<div class="kpi-value">' + total + '</div>' +
+            '<div class="kpi-label">Membros</div>' +
+        '</div>';
+        
+        statsHtml += '<div class="kpi-card">' +
+            '<div class="kpi-icon">' + (signoEmojis[signoMaisComum[0]] || '⭐') + '</div>' +
+            '<div class="kpi-value">' + signoMaisComum[0] + '</div>' +
+            '<div class="kpi-label">Signo mais comum (' + signoMaisComum[1] + ')</div>' +
+        '</div>';
+        
+        statsHtml += '<div class="kpi-card">' +
+            '<div class="kpi-icon">' + (elemEmojis[elemMaisComum[0]] || '✨') + '</div>' +
+            '<div class="kpi-value">' + elemMaisComum[0] + '</div>' +
+            '<div class="kpi-label">Elemento dominante (' + Math.round((elemMaisComum[1]/total)*100) + '%)</div>' +
+        '</div>';
+        
+        statsHtml += '<div class="kpi-card">' +
+            '<div class="kpi-icon">' + (Object.keys(elementoCount).length === 4 ? '🌈' : '🎯') + '</div>' +
+            '<div class="kpi-value">' + Object.keys(elementoCount).length + '/4</div>' +
+            '<div class="kpi-label">Elementos presentes</div>' +
+        '</div>';
+        
+        statsDiv.innerHTML = statsHtml;
+        
+        // Gerar texto de perfil do time
+        var elemDominante = elemMaisComum[0];
+        var elemPct = Math.round((elemMaisComum[1] / total) * 100);
+        
+        var elemDescricoes = {
+            'Fogo': 'Com ' + elemPct + '% de energia de Fogo, este time é movido por ação, entusiasmo e iniciativa. São pessoas que gostam de liderar, inovar e não têm medo de arriscar.',
+            'Terra': 'Com ' + elemPct + '% de energia de Terra, este time é prático, estável e orientado a resultados. São pessoas que trazem solidez, organização e foco no que precisa ser feito.',
+            'Ar': 'Com ' + elemPct + '% de energia de Ar, este time é comunicativo, criativo e cheio de ideias. São pessoas que conectam, pensam fora da caixa e adoram brainstorming.',
+            'Água': 'Com ' + elemPct + '% de energia de Água, este time é intuitivo, empático e colaborativo. São pessoas que se preocupam com o todo, têm sensibilidade e constroem laços fortes.'
+        };
+        
+        var texto = (elemDescricoes[elemDominante] || 'Time diverso com múltiplas energias!');
+        
+        // Diversidade
+        var numElementos = Object.keys(elementoCount).length;
+        if (numElementos === 4) {
+            texto += '<br><br>🌈 O time tem todos os 4 elementos representados — equilíbrio entre ação (Fogo), praticidade (Terra), ideias (Ar) e empatia (Água). Isso traz versatilidade para enfrentar qualquer desafio.';
+        } else if (numElementos === 3) {
+            texto += '<br><br>🌈 O time tem 3 dos 4 elementos — boa diversidade de estilos e formas de pensar.';
+        } else if (numElementos <= 2) {
+            texto += '<br><br>🎯 O time tem perfis bem alinhados — muita sintonia natural entre os membros.';
+        }
+        
+        // Distribuição detalhada
+        texto += '<br><br><strong>Distribuição:</strong> ';
+        elemTop.forEach(function(e, idx) {
+            texto += (elemEmojis[e[0]] || '') + ' ' + e[0] + ' (' + e[1] + ')';
+            if (idx < elemTop.length - 1) texto += ' · ';
+        });
+        
+        // Curiosidade sobre signo
+        if (signoMaisComum[1] >= 3) {
+            texto += '<br><br>⭐ <strong>Curiosidade:</strong> ' + signoMaisComum[1] + ' pessoas do time são de ' + signoMaisComum[0] + '!';
+        }
+        
+        textDiv.innerHTML = texto;
     }
 
     // Máscara de data dd/mm/aaaa
