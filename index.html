@@ -1176,15 +1176,7 @@
             <!-- Elemento do Mês -->
             <div id="elementoDoMes"></div>
             
-            <div class="card">
-                <h2 class="card-title"><i class="fas fa-users"></i> Painel do Time</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                    Todos os membros que já preencheram o mapa astral.
-                </p>
-                <button class="btn-secondary" onclick="carregarTime()">
-                    <i class="fas fa-sync-alt"></i> Atualizar
-                </button>
-            </div>
+
             <!-- Perfil do Time - KPI Cards -->
             <div id="teamProfileCard" style="display:none;">
                 <div class="kpi-grid" id="teamStats"></div>
@@ -1199,6 +1191,11 @@
                     <h3>Nenhum membro ainda</h3>
                     <p>Preencha seu mapa na aba "Meu Mapa" para começar!</p>
                 </div>
+            </div>
+            <div style="text-align:center; margin-top:24px;">
+                <button class="btn-secondary" onclick="carregarTime()">
+                    <i class="fas fa-sync-alt"></i> Atualizar dados
+                </button>
             </div>
         </div>
 
