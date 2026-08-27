@@ -1009,11 +1009,7 @@
             <p>Descubra os signos, ascendentes e compatibilidades da sua equipe ✨</p>
         </header>
 
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <div class="status-dot" id="statusDot"></div>
-            <span id="statusText">Conectando...</span>
-        </div>
+
 
         <!-- Tabs -->
         <div class="tabs">
@@ -2379,11 +2375,7 @@
         var statsHtml = '';
         
         // Card 1: Total membros
-        statsHtml += '<div class="kpi-card">' +
-            '<div class="kpi-icon">👥</div>' +
-            '<div class="kpi-value">' + total + '</div>' +
-            '<div class="kpi-label">Membros</div>' +
-        '</div>';
+        // Card de membros removido
         
         // Card 2: Signos - mini ranking top 5
         var signoListHtml = signoTop.slice(0, 5).map(function(s) {
@@ -3216,6 +3208,10 @@
     </div>
 
 <footer style="text-align:center; padding:24px; color:var(--text-secondary); font-size:0.75rem; opacity:0.7; margin-top:40px;">
+        <div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:8px;">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Conectando...</span>
+        </div>
         Created by @paannalu
     </footer>
 </body>
