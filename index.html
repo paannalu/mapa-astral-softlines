@@ -1678,7 +1678,7 @@
             return;
         }
         
-        grid.innerHTML = membrosTime.map(m => {
+        grid.innerHTML = membrosTime.slice().reverse().map(m => {
             const inicial = (m.nome || '?')[0].toUpperCase();
             return `
                 <div class="team-member-card">
@@ -2303,9 +2303,9 @@
             }
         }
         
-        // Ordenar do mais compatível para o menos — mostrar apenas Top 10
+        // Ordenar do mais compatível para o menos — mostrar apenas Top 5
         duplas.sort(function(a, b) { return b.score - a.score; });
-        duplas = duplas.slice(0, 10);
+        duplas = duplas.slice(0, 5);
         
         function renderList(items) {
             return items.map(function(d, idx) {
