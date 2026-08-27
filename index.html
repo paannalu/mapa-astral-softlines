@@ -974,6 +974,31 @@
             color: var(--accent-purple-light);
             font-size: 0.75rem;
         }
+
+        /* Multi-select chips */
+        .multi-select-chip {
+            display: inline-flex;
+            cursor: pointer;
+        }
+        .multi-select-chip input { display: none; }
+        .multi-select-chip .chip-content {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .multi-select-chip input:checked + .chip-content {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+            color: white;
+            box-shadow: 0 2px 8px rgba(127,90,240,0.3);
+        }
+        .multi-select-chip:hover .chip-content {
+            border-color: var(--accent-purple-light);
+        }
     </style>
 </head>
 <body>
@@ -1179,22 +1204,48 @@
 
         <!-- Tab: Compatibility Matrix -->
         <div class="tab-content" id="compat-tab">
-            <!-- Comparar dois membros -->
+            <!-- Comparar Compatibilidade (Dupla / Equipe) -->
             <div class="card">
                 <h2 class="card-title"><i class="fas fa-people-arrows"></i> Comparar Compatibilidade</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 16px;">
-                    Selecione duas pessoas para ver a compatibilidade entre elas.
-                </p>
-                <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
-                    <select id="comparar1" class="compat-select" onchange="compararDupla()">
-                        <option value="">Selecione...</option>
-                    </select>
-                    <span style="font-size:1.5rem;">💫</span>
-                    <select id="comparar2" class="compat-select" onchange="compararDupla()">
-                        <option value="">Selecione...</option>
-                    </select>
+                
+                <!-- Toggle Dupla/Equipe -->
+                <div class="mode-toggle" style="margin-bottom:20px;">
+                    <button type="button" class="mode-btn active" id="modeCompDupla" onclick="setCompMode('dupla')">
+                        <i class="fas fa-user-friends"></i> Dupla
+                    </button>
+                    <button type="button" class="mode-btn" id="modeCompEquipe" onclick="setCompMode('equipe')">
+                        <i class="fas fa-users"></i> Equipe
+                    </button>
                 </div>
-                <div id="comparacaoResultado"></div>
+                
+                <!-- Modo Dupla -->
+                <div id="compModeDupla">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size:0.85rem;">
+                        Selecione duas pessoas para ver a compatibilidade.
+                    </p>
+                    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
+                        <select id="comparar1" class="compat-select" onchange="compararDupla()">
+                            <option value="">Selecione...</option>
+                        </select>
+                        <span style="font-size:1.5rem;">💫</span>
+                        <select id="comparar2" class="compat-select" onchange="compararDupla()">
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div id="comparacaoResultado"></div>
+                </div>
+                
+                <!-- Modo Equipe -->
+                <div id="compModeEquipe" style="display:none;">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size:0.85rem;">
+                        Selecione 3 ou mais membros para ver a sinergia do grupo.
+                    </p>
+                    <div id="multiSelectContainer" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;"></div>
+                    <button class="btn-secondary" onclick="analisarEquipe()" id="btnAnalisarEquipe" style="display:none;">
+                        <i class="fas fa-search"></i> Analisar sinergia
+                    </button>
+                    <div id="equipeResultado" style="margin-top:16px;"></div>
+                </div>
             </div>
             
             <!-- Rankings -->
@@ -1207,7 +1258,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Matriz colapsável -->
             <div class="card">
                 <div class="collapsible-header" onclick="toggleMatriz()">
@@ -1644,7 +1695,7 @@
                             <div class="member-name">${m.nome}</div>
                             <div class="member-title" style="font-size:0.7rem;color:var(--accent-gold);font-style:italic;margin-bottom:2px;">✦ ${gerarTituloAstral(m.sol_nome || '', m.asc_nome || '')}</div>
                             <div class="member-signs">
-                                ${m.sol_emoji || ''} ${m.sol_nome || ''} • ⬆️ ${m.asc_nome || ''}</div><div class="member-date" style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">${m.cidade || ''}
+                                ${m.sol_emoji || ''} ${m.sol_nome || ''} • ⬆️ ${m.asc_nome || ''}
                             </div>
                         </div>
                     </div>
@@ -1676,6 +1727,8 @@
         // Render all compat sections
         popularSelects();
         renderRankings();
+        popularMultiSelect();
+        popularMultiSelect();
         
         // Also try loading from Sheets in background
         if (isGoogleSheetsConfigured()) {
@@ -2888,6 +2941,265 @@
         if (dicas2.length === 0) dicas2.push('Vocês têm estilos similares — foquem em se desafiar mutuamente');
         
         return { dicas1: dicas1, dicas2: dicas2 };
+    }
+
+
+    // Popular checkboxes do multi-select da equipe
+    function popularMultiSelect() {
+        var container = document.getElementById('multiSelectContainer');
+        if (!container) return;
+        
+        container.innerHTML = membrosTime.map(function(m) {
+            return '<label class="multi-select-chip">' +
+                '<input type="checkbox" onchange="onMultiSelectChange()" value="' + m.nome + '">' +
+                '<span class="chip-content">' + (m.sol_emoji || '⭐') + ' ' + m.nome + '</span>' +
+            '</label>';
+        }).join('');
+    }
+    
+    function onMultiSelectChange() {
+        var checked = document.querySelectorAll('#multiSelectContainer input:checked');
+        var btn = document.getElementById('btnAnalisarEquipe');
+        if (btn) btn.style.display = checked.length >= 3 ? 'inline-block' : 'none';
+    }
+    
+    // Analisar sinergia da equipe selecionada
+    function analisarEquipe() {
+        var checked = document.querySelectorAll('#multiSelectContainer input:checked');
+        var nomes = Array.from(checked).map(function(cb) { return cb.value; });
+        
+        if (nomes.length < 3) {
+            showToast('Selecione pelo menos 3 membros', 'error');
+            return;
+        }
+        
+        var membros = nomes.map(function(n) { return membrosTime.find(function(m) { return m.nome === n; }); }).filter(Boolean);
+        var resultado = document.getElementById('equipeResultado');
+        
+        // Calcular score médio entre todas as duplas
+        var totalScore = 0;
+        var numPares = 0;
+        var pares = [];
+        
+        for (var i = 0; i < membros.length; i++) {
+            for (var j = i + 1; j < membros.length; j++) {
+                var score = calcularCompatDupla(membros[i], membros[j]);
+                totalScore += score;
+                numPares++;
+                pares.push({ nome1: membros[i].nome, nome2: membros[j].nome, score: score });
+            }
+        }
+        
+        var mediaGeral = numPares > 0 ? (totalScore / numPares) : 0;
+        var scoreEquipe = Math.round(mediaGeral * 10) / 10;
+        
+        // Calcular dimensões médias do grupo
+        var dimsGroup = { acao: 0, autonomia: 0, direto: 0, risco: 0, racional: 0 };
+        membros.forEach(function(m) {
+            var d = calcularDimensoes(m.sol_nome || '', m.asc_nome || '');
+            dimsGroup.acao += d.acao;
+            dimsGroup.autonomia += d.autonomia;
+            dimsGroup.direto += d.direto;
+            dimsGroup.risco += d.risco;
+            dimsGroup.racional += d.racional;
+        });
+        var n = membros.length;
+        dimsGroup.acao = Math.round(dimsGroup.acao / n);
+        dimsGroup.autonomia = Math.round(dimsGroup.autonomia / n);
+        dimsGroup.direto = Math.round(dimsGroup.direto / n);
+        dimsGroup.risco = Math.round(dimsGroup.risco / n);
+        dimsGroup.racional = Math.round(dimsGroup.racional / n);
+        
+        // Elementos presentes
+        var elemCount = {};
+        membros.forEach(function(m) {
+            var elem = m.sol_elemento || 'Fogo';
+            elemCount[elem] = (elemCount[elem] || 0) + 1;
+        });
+        var elemEmojis = { 'Fogo': '🔥', 'Terra': '🌍', 'Ar': '💨', 'Água': '💧' };
+        
+        // Score visual
+        var starsHtml = '';
+        var roundedScore = Math.round(scoreEquipe);
+        for (var s = 0; s < 5; s++) {
+            starsHtml += s < roundedScore ? '<span class="filled">★</span>' : '<span class="empty">★</span>';
+        }
+        
+        // Top 3 pares e bottom 3
+        pares.sort(function(a, b) { return b.score - a.score; });
+        var topPares = pares.slice(0, 3);
+        
+        // Gerar texto de análise
+        var numElementos = Object.keys(elemCount).length;
+        var analise = '';
+        if (numElementos === 4) {
+            analise = 'Equipe completa! Todos os 4 elementos representados — isso dá versatilidade para qualquer tipo de projeto.';
+        } else if (numElementos === 3) {
+            analise = 'Boa diversidade com 3 elementos. A equipe cobre múltiplas perspectivas.';
+        } else if (numElementos === 2) {
+            analise = 'Equipe focada em 2 elementos — muita sintonia natural, mas considere trazer alguém com perspectiva diferente em decisões críticas.';
+        } else {
+            analise = 'Equipe muito alinhada (mesmo elemento) — excelente sintonia mas podem ter pontos cegos em comum.';
+        }
+        
+        // Montar HTML
+        var html = '<div class="compat-result">';
+        
+        html += '<div style="text-align:center;margin-bottom:16px;">';
+        html += '<div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px;">Sinergia da equipe (' + membros.length + ' pessoas)</div>';
+        html += '<div class="compat-score-big">' + scoreEquipe.toFixed(1) + '/5</div>';
+        html += '<div class="compat-stars">' + starsHtml + '</div>';
+        html += '</div>';
+        
+        // Elementos da equipe
+        html += '<div style="display:flex;justify-content:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">';
+        Object.entries(elemCount).forEach(function(entry) {
+            html += '<span style="font-size:0.8rem;color:var(--text-secondary);">' + (elemEmojis[entry[0]] || '') + ' ' + entry[0] + ': ' + entry[1] + '</span>';
+        });
+        html += '</div>';
+        
+        // Análise
+        html += '<div class="insight-section"><h4>🔍 Análise da equipe</h4><p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.5;">' + analise + '</p></div>';
+        
+        // Dimensões médias do grupo
+        html += '<div class="insight-section" style="margin-top:12px;"><h4>📊 Perfil médio da equipe</h4>';
+        html += renderDimensoes(dimsGroup);
+        html += '</div>';
+        
+        // Melhores duplas no grupo
+        html += '<div class="insight-section" style="margin-top:12px;"><h4>🤗 Melhores conexões neste grupo</h4>';
+        html += '<ul style="list-style:none;padding:0;">';
+        topPares.forEach(function(p) {
+            var stars = '';
+            for (var s = 0; s < 5; s++) stars += s < p.score ? '★' : '☆';
+            html += '<li style="font-size:0.83rem;color:var(--text-secondary);padding:4px 0;">' + p.nome1 + ' & ' + p.nome2 + ' — <span style="color:var(--accent-gold);">' + stars + '</span></li>';
+        });
+        html += '</ul></div>';
+        
+        // Dicas para trabalhar em grupo
+        var dicasGrupo = gerarDicasGrupo(membros, dimsGroup, elemCount);
+        html += '<div class="insight-section" style="margin-top:12px;">';
+        html += '<h4>💡 Dicas para trabalhar em grupo</h4>';
+        html += '<ul>' + dicasGrupo.map(function(d) { return '<li>' + d + '</li>'; }).join('') + '</ul>';
+        html += '</div>';
+        
+        html += '</div>';
+        resultado.innerHTML = html;
+    }
+
+
+    // Toggle entre modo Dupla e Equipe na comparação
+    function setCompMode(mode) {
+        document.getElementById('modeCompDupla').classList.toggle('active', mode === 'dupla');
+        document.getElementById('modeCompEquipe').classList.toggle('active', mode === 'equipe');
+        document.getElementById('compModeDupla').style.display = mode === 'dupla' ? 'block' : 'none';
+        document.getElementById('compModeEquipe').style.display = mode === 'equipe' ? 'block' : 'none';
+    }
+
+
+    // Gerar dicas para trabalhar em grupo baseadas nos SIGNOS do grupo
+    function gerarDicasGrupo(membros, dimsGroup, elemCount) {
+        var dicas = [];
+        var n = membros.length;
+        
+        // Contar signos, modalidades e aspectos no grupo
+        var signoCount = {};
+        var modCount = { 'Cardinal': 0, 'Fixo': 0, 'Mutável': 0 };
+        var signoModalidade = {
+            'Áries':'Cardinal','Touro':'Fixo','Gêmeos':'Mutável','Câncer':'Cardinal',
+            'Leão':'Fixo','Virgem':'Mutável','Libra':'Cardinal','Escorpião':'Fixo',
+            'Sagitário':'Mutável','Capricórnio':'Cardinal','Aquário':'Fixo','Peixes':'Mutável'
+        };
+        
+        membros.forEach(function(m) {
+            var sol = m.sol_nome || '';
+            signoCount[sol] = (signoCount[sol] || 0) + 1;
+            if (signoModalidade[sol]) modCount[signoModalidade[sol]]++;
+        });
+        
+        // Calcular média de compatibilidade interna (quantas quadraturas vs trígonos)
+        var signosLista = ['Áries','Touro','Gêmeos','Câncer','Leão','Virgem','Libra','Escorpião','Sagitário','Capricórnio','Aquário','Peixes'];
+        var aspectCount = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+        
+        for (var i = 0; i < membros.length; i++) {
+            for (var j = i + 1; j < membros.length; j++) {
+                var idx1 = signosLista.indexOf(membros[i].sol_nome || '');
+                var idx2 = signosLista.indexOf(membros[j].sol_nome || '');
+                if (idx1 >= 0 && idx2 >= 0) {
+                    var dist = Math.min(Math.abs(idx1-idx2), 12-Math.abs(idx1-idx2));
+                    aspectCount[dist]++;
+                }
+            }
+        }
+        
+        var totalPares = n * (n-1) / 2;
+        var pctTrigono = totalPares > 0 ? Math.round((aspectCount[4] / totalPares) * 100) : 0;
+        var pctSextil = totalPares > 0 ? Math.round((aspectCount[2] / totalPares) * 100) : 0;
+        var pctQuadratura = totalPares > 0 ? Math.round((aspectCount[3] / totalPares) * 100) : 0;
+        var pctHarmonia = pctTrigono + pctSextil;
+        
+        // Dicas baseadas nos ASPECTOS predominantes entre os signos
+        if (pctHarmonia > 50) {
+            dicas.push('✨ Grupo com muita harmonia natural (' + pctHarmonia + '% das duplas em trígono/sextil) — a comunicação flui fácil. Usem isso para projetos que precisam de velocidade e sintonia.');
+        } else if (pctQuadratura > 40) {
+            dicas.push('⚡ Grupo com bastante tensão criativa (' + pctQuadratura + '% das duplas em quadratura) — isso é motor de inovação! Canalizem os debates em brainstorms estruturados com timebox.');
+        } else {
+            dicas.push('🔄 Grupo com mix de aspectos — vocês têm tanto sintonia quanto desafio. Usem as duplas harmônicas para executar e as desafiadoras para revisar/questionar.');
+        }
+        
+        // Dicas baseadas nas MODALIDADES dos signos
+        var modDominante = Object.entries(modCount).sort(function(a,b){return b[1]-a[1];})[0];
+        var modPct = Math.round((modDominante[1] / n) * 100);
+        
+        if (modDominante[0] === 'Cardinal' && modPct > 40) {
+            dicas.push('🏁 Maioria de signos Cardinais (' + modPct + '%) — muitos "starters" no grupo. Risco: todos querem liderar. Dica: rotem a liderança por sprint/tarefa. Definam quem é o DRI (Directly Responsible Individual) de cada entrega.');
+        } else if (modDominante[0] === 'Fixo' && modPct > 40) {
+            dicas.push('⚓ Maioria de signos Fixos (' + modPct + '%) — muita perseverança e consistência. Risco: resistência a mudanças. Dica: quando precisarem pivotar, apresentem dados e deem tempo para digerir antes de decidir.');
+        } else if (modDominante[0] === 'Mutável' && modPct > 40) {
+            dicas.push('🦋 Maioria de signos Mutáveis (' + modPct + '%) — super adaptáveis e criativos. Risco: muitas ideias sem conclusão. Dica: usem checklists e definam "definition of done" clara para cada task.');
+        } else {
+            dicas.push('⚖️ Mix equilibrado de modalidades — vocês conseguem iniciar (Cardinal), manter (Fixo) e adaptar (Mutável). Distribuam as fases do projeto por quem tem mais afinidade natural com cada uma.');
+        }
+        
+        // Dicas baseadas em SIGNOS específicos no grupo
+        var signosDominantes = Object.entries(signoCount).filter(function(s){return s[1] >= 2;}).sort(function(a,b){return b[1]-a[1];});
+        
+        if (signosDominantes.length > 0) {
+            var top = signosDominantes[0];
+            var signoTips = {
+                'Áries': '♈ ' + top[1] + ' arianos no grupo — energia alta! Mantenham reuniões curtas e objetivas. Esse perfil perde interesse se a discussão se arrasta.',
+                'Touro': '♉ ' + top[1] + ' taurinos no grupo — confiabilidade é o forte. Respeitem o tempo deles para processar mudanças. Pressão gera teimosia, não ação.',
+                'Gêmeos': '♊ ' + top[1] + ' geminianos no grupo — comunicação é o superpoder. Usem-nos como ponte entre sub-grupos. Cuidado com escopo — adoram adicionar ideias.',
+                'Câncer': '♋ ' + top[1] + ' cancerianos no grupo — time empático e leal. Criem rituais de check-in. Mudanças abruptas sem contexto geram insegurança.',
+                'Leão': '♌ ' + top[1] + ' leoninos no grupo — energy e carisma de sobra. Deem palco para cada um brilhar. Reconhecimento público é combustível.',
+                'Virgem': '♍ ' + top[1] + ' virginianos no grupo — atenção ao detalhe é o forte. Perfeitos para QA e revisão. Deem contexto do "porquê" antes do "como".',
+                'Libra': '♎ ' + top[1] + ' librianos no grupo — harmonia e diplomacia. Ótimos mediadores. Mas cuidado: podem evitar conflitos necessários. Incentivem opiniões diretas.',
+                'Escorpião': '♏ ' + top[1] + ' escorpianos no grupo — foco e intensidade. Excelentes em deep dives e investigações. Confiem informação importante a eles.',
+                'Sagitário': '♐ ' + top[1] + ' sagitarianos no grupo — otimismo e visão de futuro. Ótimos para definir norte/estratégia. Precisam de liberdade, não microgestão.',
+                'Capricórnio': '♑ ' + top[1] + ' capricornianos no grupo — disciplina e foco em resultados. O backbone do time. Valorizem o esforço, não só a entrega final.',
+                'Aquário': '♒ ' + top[1] + ' aquarianos no grupo — inovação e pensamento lateral. Deem espaço para ideias malucas. A melhor solução pode vir da mais inesperada.',
+                'Peixes': '♓ ' + top[1] + ' piscianos no grupo — intuição e criatividade. Ouçam quando disserem "algo não parece certo" — geralmente estão certos.'
+            };
+            if (signoTips[top[0]]) dicas.push(signoTips[top[0]]);
+        }
+        
+        // Dica de oposições no grupo (complementaridade)
+        if (aspectCount[6] >= 2) {
+            dicas.push('🔮 Vocês têm ' + aspectCount[6] + ' pares de signos opostos — isso é complementaridade natural. Em decisões polarizadas, juntem os opostos: um vê o que o outro não vê.');
+        }
+        
+        // Dica baseada no tamanho
+        if (n >= 6) {
+            dicas.push('👥 Com ' + n + ' pessoas, dividam em sub-grupos de 2-3 para tarefas específicas. Usem as duplas com trígono (★★★★★) como pares de execução e as quadraturas como pares de revisão.');
+        }
+        if (n === 3) {
+            dicas.push('👌 Trio é formato ideal para decisões rápidas — se 2 de 3 concordam, sigam em frente. Rotem quem é o "desafiador" em cada pauta.');
+        }
+        if (n === 4) {
+            dicas.push('🎯 Quarteto é ótimo para squads — dividam em 2 duplas que trabalham em paralelo e sincronizam ao final de cada ciclo.');
+        }
+        
+        return dicas;
     }
 
     // Máscara de data dd/mm/aaaa
